@@ -36,7 +36,7 @@
 		      		<a class="nav-link" href="#">Home <span class="sr-only">(current)</span></a>
 		        </li>
 		      	<li class="nav-item">
-		        	<a class="nav-link" href="#">Catalogo</a>
+		        	<a class="nav-link" id="lista" href="#myModal" data-toggle="modal" data-target="#myModal" onclick="riempi()">Catalogo</a>
 		      	</li>
 		      	<li class="nav-item dropdown">
 		        	<a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Info</a>
@@ -57,6 +57,7 @@
 		    </form>
 		</div>
 	</nav>
+	
 	<div class="container-fluid">
 		<div class="row">
 			<div id="player" class="col-sm-6">
@@ -75,6 +76,25 @@
 		</div>
 		
 	</div>
+	<div class="modal fade" id="myModal" role="dialog">
+    <div class="modal-dialog">
+    
+      <!-- Modal content-->
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal">&times;</button>
+          <h4 class="modal-title">Lista canzoni</h4>
+        </div>
+        <div class="modal-body">
+          <div id="main"></div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+      
+    </div>
+  </div>
 
 
 </body>
