@@ -40,9 +40,8 @@
       function stopVideo() {
         player.stopVideo();
       }
-//con jquery bisogna trovare il modo di dire che il link è stato cliccato e far riempire il modale
-    //  $("#lista").onClick(riempi());
 
+      //viene riempita la lista delle canzoni iniziali
       function grafica(data){
           for (var i = 0; i < data.length; i++) {
             $("#main").append("<button>"+data[i].category+ data[i].artist+data[i].title+data[i].videoID+"</button>");
@@ -63,5 +62,19 @@
             }
           });       
         }
+
+        function openCity(evt, cityName) {
+    var i, tabcontent, tablinks;
+    tabcontent = document.getElementsByClassName("tabcontent");
+    for (i = 0; i < tabcontent.length; i++) {
+        tabcontent[i].style.display = "none";
+    }
+    tablinks = document.getElementsByClassName("tablinks");
+    for (i = 0; i < tablinks.length; i++) {
+        tablinks[i].className = tablinks[i].className.replace(" active", "");
+    }
+    document.getElementById(cityName).style.display = "block";
+    evt.currentTarget.className += " active";
+  }
     
 
