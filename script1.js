@@ -41,7 +41,7 @@
         player.stopVideo();
       }
 //con jquery bisogna trovare il modo di dire che il link è stato cliccato e far riempire il modale
-      $("#lista").onClick()=riempi();
+    //  $("#lista").onClick(riempi());
 
       function grafica(data){
           for (var i = 0; i < data.length; i++) {
@@ -50,6 +50,7 @@
         }
         function riempi(){
           $.ajax({
+
             url: "http://site1825.tw.cs.unibo.it/video.json",
             success: function(data) {
               grafica(data);
