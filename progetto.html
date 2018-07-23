@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -31,7 +33,7 @@
 	}
 
 	/* Style the buttons inside the tab */
-	.tab button {
+	button {
 	    background-color: inherit;
 	    float: left;
 	    border: none;
@@ -90,9 +92,6 @@
 		          		<a class="dropdown-item" href="#">Something else here</a>
 		        	</div>
 		      	</li>
-		      	<li class="nav-item">
-		        	<a class="nav-link disabled" href="#">Disabled</a>
-		      	</li>
 		    </ul>
 			<form class="form-inline my-2 my-lg-0">
 		    	<input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search">
@@ -114,24 +113,24 @@
 		<div id="raccomander">
 			<!--VARI RACCOMANDER DA SISTEMARE-->
 			<div class="tab">
-				  <button class="tablinks" onclick="openCity(event, 'London')">London</button>
-				  <button class="tablinks" onclick="openCity(event, 'Paris')">Paris</button>
-				  <button class="tablinks" onclick="openCity(event, 'Tokyo')">Tokyo</button>
+				  <button class="tablinks" onclick="caricaTab(event, 'Recent')">Recent</button>
+				  <button class="tablinks" onclick="caricaTab(event, 'Random')">Random</button>
+				  <button class="tablinks" onclick="caricaTab(event, 'popolarity')">Popolarity</button>
 			</div>
 
-			<div id="London" class="tabcontent">
-			  <h3>London</h3>
-			  <p>London is the capital city of England.</p>
+			<div id="Recent" class="tabcontent">
+			  <h3>Recent</h3>
+			
 			</div>
 
-			<div id="Paris" class="tabcontent">
-			  <h3>Paris</h3>
-			  <p>Paris is the capital of France.</p> 
+			<div id="Random" class="tabcontent">
+			  <h3>Random</h3>
+			 
 			</div>
 
-			<div id="Tokyo" class="tabcontent">
-			  <h3>Tokyo</h3>
-			  <p>Tokyo is the capital of Japan.</p>
+			<div id="popolarity" class="tabcontent">
+			  <h3>Popolarity</h3>
+			 
 			</div>	
 		</div>
 		
