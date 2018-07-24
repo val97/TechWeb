@@ -10,7 +10,7 @@
       // 3. This function creates an <iframe> (and YouTube player)
       //    after the API code downloads.
 
-
+      var currentVideo="qjQT26RGjwg";
       var player;
       function onYouTubeIframeAPIReady() {
         player = new YT.Player('player', {
@@ -38,10 +38,11 @@
           setTimeout(stopVideo, 6000);
           done = true;
         }
-      /*  if (event.data == YT.PlayerState.PAUSED ) {
-          player.loadVideoById("bHQqvYy5KYo", 5, "large");
-      }*/
-    }
+       if(event.data == YT.PlayerState.PLAYING){
+        setTimeout(salvarecent,3000,currentVideo);
+          alert("dtcfh");
+       }
+      }
       function stopVideo() {
         player.stopVideo();
       }
@@ -56,29 +57,37 @@
         }
 
         function caricavideo(data){
-          // console.log(JSON.stringify(data));
+            currentVideo=data;
            player.loadVideoById(data, 0, "large");
-           setTimeout(salvarecent,20000,data);
+          // setTimeout(salvarecent,3000,data);
+           //alert("dyfh");
 
         }
 
         var recommender_size=20;    //dimensione tabella degli ultimi video visitati
-        var shift=10;   //siccome la chiave 0 (=null) é melgio non usarla, viene sciftato tutto di shift (non é importante quanto valga)
         function salvarecent(ID){
-          var key=localStorage.getItem("counter");  //counter=valore della prossima chiave libera 
-          if (key==null)    //se non esiste già
-            key=shift;  
-          localStorage.setItem(key, ID);
-          key++;
-          key=(key-shift)%recommender_size+shift;
-          localStorage.setItem("counter", key);
-
+          var vid=[recommender_size];
+          var dim=caricarecent(vid);
+          var exist=false;
+          for (var i = 0; i <dim; i++) {
+           if(ID==vid[i])
+              exist=true;
+          }
+          if(!exist){
+                var key=localStorage.getItem("counter");  //counter=valore della prossima chiave libera 
+                if (!key)    //se non esiste già
+                  key=0;  
+                localStorage.setItem(key, ID);
+                key++;
+                key=key%recommender_size;
+                localStorage.setItem("counter", key);
+          }
           console.log(ID);
         }
         function caricarecent(out){
           var i;
           for(i=0;i<recommender_size;i++){
-          key=(localStorage.getItem("counter")-shift-i-1+recommender_size)%recommender_size+shift;
+          key=(localStorage.getItem("counter")-i-1+recommender_size)%recommender_size;
           var video=localStorage.getItem(key);
           if (video==null)
             return i;   //dimensione di out
@@ -106,10 +115,13 @@
        function stampa(vid, dim){
         var html="";
           for (var i = 0; i < dim; i++) {
-            html+="<img width=7% heigth=7% src ='https://img.youtube.com/vi/"+vid[i]+"/0.jpg'>";
+            html+="<img width=7% heigth=7% src ='https://img.youtube.com/vi/"+vid[i]+"/0.jpg' value='"+vid[i]+"'>";
           }
           $(".tabcontent").html(html);
         }
+
+       // $('img').click(caricavideo($(this).value));
+         
 
         function caricaTab(evt, category) {
             var i, tabcontent, tablinks;
@@ -129,6 +141,14 @@
             if(category=="Recent")
               dim=caricarecent(vid);
             stampa(vid,dim);
+            
+            //$('img').click(caricavideo,$(this).attr("value"));
+           $('img').click(function(){
+                caricavideo($(this).attr("value"));
+           });
+           
+            
+        
         }
         
 
