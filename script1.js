@@ -9,8 +9,38 @@
 
       // 3. This function creates an <iframe> (and YouTube player)
       //    after the API code downloads.
-
       var currentVideo="qjQT26RGjwg";
+
+      //timer per controllare i secondi di video passati prima di salvarlo
+      var clock;
+      var timerOn;
+      var time;
+
+      function timedCount(){
+        time=time+1;
+        if(time==10)
+          salvarecent(currentVideo);
+        if(time<10)
+          clock=setTimeout(timedCount, 1000);
+      }
+
+      function startClock(){
+        if(!timerOn){
+          timerOn=1;
+          timedCount();
+        }
+      }
+      function newClock(){
+        timerOn=0;
+        time=0;
+
+      }
+      function stopClock(){
+        clearTimeout(clock);
+        timerOn=0;
+
+      }
+      //inizializzazione player
       var player;
       function onYouTubeIframeAPIReady() {
         player = new YT.Player('player', {
@@ -24,28 +54,23 @@
         });
       }
 
-      // 4. The API will call this function when the video player is ready.
+      
       function onPlayerReady(event) {
         event.target.playVideo();
       }
 
-      // 5. The API calls this function when the player's state changes.
-      //    The function indicates that when playing a video (state=1),
-      //    the player should play for six seconds and then stop.
+     
      var done = false;
       function onPlayerStateChange(event) {
-        if (event.data == YT.PlayerState.PLAYING && !done) {
-          setTimeout(stopVideo, 6000);
-          done = true;
-        }
        if(event.data == YT.PlayerState.PLAYING){
-        setTimeout(salvarecent,3000,currentVideo);
-          alert("dtcfh");
+          startClock();
+          //setTimeout(salvarecent,3000,currentVideo);
+       }
+        if(event.data == YT.PlayerState.PAUSED){
+          stopClock();
        }
       }
-      function stopVideo() {
-        player.stopVideo();
-      }
+      
 
 
 
@@ -57,11 +82,10 @@
         }
 
         function caricavideo(data){
+            newClock();
             currentVideo=data;
            player.loadVideoById(data, 0, "large");
-          // setTimeout(salvarecent,3000,data);
-           //alert("dyfh");
-
+          
         }
 
         var recommender_size=20;    //dimensione tabella degli ultimi video visitati
@@ -97,7 +121,7 @@
           return recommender_size;
         }
 
-
+        //aggiunge la lista di canzoni iniziale
         function riempi(){
           $.ajax({
 
@@ -112,6 +136,7 @@
             }
           });       
         }
+        //riempie i recommender
        function stampa(vid, dim){
         var html="";
           for (var i = 0; i < dim; i++) {
