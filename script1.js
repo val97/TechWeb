@@ -1,6 +1,5 @@
+      console.log("ho chiamato lo script");
 
-
-      // 2. This code loads the IFrame Player API code asynchronously.
       var tag = document.createElement('script');
 
       tag.src = "https://www.youtube.com/iframe_api";
@@ -175,6 +174,23 @@
             
         
         }
-        
-
+        // inserita search luciano 
+$(document).ready(function(){
+  $("#search-button").click(function(e){
+    e.preventDefault();
+    var q = $('#query').val();
+    var request = gapi.client.youtube.search.list({
+          q:q,
+          part: 'snippet'
+    });
+    request.execute(function(response){
+      console.log(response);
+    });
+  });
+});
+function init(){
+  console.log("pippo");
+  gapi.client.setApiKey("AIzaSyCmxhjyAdTBxuEOG_etapCgLYwIBpSmdbQ");
+  gapi.client.load("youtube","v3",function(){ });
+}
 

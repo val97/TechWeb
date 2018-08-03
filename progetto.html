@@ -17,6 +17,9 @@
 
 	<title></title>
 	<script type="text/javascript" src="script1.js"></script>
+	
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+	 <script src="https://apis.google.com/js/client.js?onload=init"></script>
 
 </head>
 
@@ -65,10 +68,6 @@
 	#raccomander{
 		width: 100%;
 	}
-	img{
-		width:7%; 
-		height:=7%;
-	}
 
 </style> 
 
@@ -98,8 +97,8 @@
 		      	</li>
 		    </ul>
 			<form class="form-inline my-2 my-lg-0">
-		    	<input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search">
-		      	<button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
+		    	<input class="form-control mr-sm-2" id="query type="search" placeholder="Search" aria-label="Search">
+		      	<button class="btn btn-outline-success my-2 my-sm-0" id="search-button">Search</button>
 		    </form>
 		</div>
 	</nav>
@@ -120,6 +119,7 @@
 				  <button class="tablinks" onclick="caricaTab(event, 'Recent')">Recent</button>
 				  <button class="tablinks" onclick="caricaTab(event, 'Random')">Random</button>
 				  <button class="tablinks" onclick="caricaTab(event, 'popolarity')">Popolarity</button>
+				  <button class="tablinks" onclick="caricaTab(event, 'search')">Search</button>
 			</div>
 
 			<div id="Recent" class="tabcontent">
@@ -135,7 +135,11 @@
 			<div id="popolarity" class="tabcontent">
 			  <h3>Popolarity</h3>
 			 
-			</div>	
+			</div>
+			<div id="search" class="tabcontent">
+			  <h3>Search</h3>
+			 
+			</div>		
 		</div>
 		
 	<div class="modal fade" id="myModal" role="dialog">
