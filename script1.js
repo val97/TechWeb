@@ -163,17 +163,18 @@
 
             var dim=recommender_size;
             var vid=[recommender_size];
+
             if(category=="Recent")
               dim=caricarecent(vid);
-            stampa(vid,dim);
+            //stampa(vid,dim);
             if (category=="search") {
+
               dim=resSearch.items.length;
               for (var i = 0; i < dim; i++) {
-                vid[i]=resSearch.items[i].id.videoId;
-                      }
-              stampa(vid,dim);
+                  vid[i]=resSearch.items[i].id.videoId;
+              }
             }
-
+            stampa(vid,dim);
             
             //$('img').click(caricavideo,$(this).attr("value"));
            $('img').click(function(){
@@ -191,7 +192,9 @@
             console.log(q);
             var request = gapi.client.youtube.search.list({
                   q:q,
-                  part: 'snippet'
+                  part: 'snippet',
+                  type: 'video',                //servono per far cercare soltanto video musicali
+                  videoCategoryId: '10'
             });
             request.execute(function(response){
               console.log(response);
