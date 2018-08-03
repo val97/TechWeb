@@ -146,6 +146,7 @@
 
        // $('img').click(caricavideo($(this).value));
          
+        var resSearch;
 
         function caricaTab(evt, category) {
             var i, tabcontent, tablinks;
@@ -165,6 +166,14 @@
             if(category=="Recent")
               dim=caricarecent(vid);
             stampa(vid,dim);
+            if (category=="search") {
+              dim=resSearch.items.length;
+              for (var i = 0; i < dim; i++) {
+                vid[i]=resSearch.items[i].id.videoId;
+                      }
+              stampa(vid,dim);
+            }
+
             
             //$('img').click(caricavideo,$(this).attr("value"));
            $('img').click(function(){
@@ -172,25 +181,27 @@
            });
            
             
-        
+       
         }
-        // inserita search luciano 
-$(document).ready(function(){
-  $("#search-button").click(function(e){
-    e.preventDefault();
-    var q = $('#query').val();
-    var request = gapi.client.youtube.search.list({
-          q:q,
-          part: 'snippet'
-    });
-    request.execute(function(response){
-      console.log(response);
-    });
-  });
-});
-function init(){
-  console.log("pippo");
-  gapi.client.setApiKey("AIzaSyCmxhjyAdTBxuEOG_etapCgLYwIBpSmdbQ");
-  gapi.client.load("youtube","v3",function(){ });
-}
+        // inserita search luci
+        $(document).ready(function(){
+          $("#search-button").click(function(e){
+            e.preventDefault();
+            var q = $('#query').val();
+            console.log(q);
+            var request = gapi.client.youtube.search.list({
+                  q:q,
+                  part: 'snippet'
+            });
+            request.execute(function(response){
+              console.log(response);
+              resSearch=response;
+            });
+          });
+        });
+        function init(){
+          console.log("pippo");
+          gapi.client.setApiKey("AIzaSyCmxhjyAdTBxuEOG_etapCgLYwIBpSmdbQ");
+          gapi.client.load("youtube","v3",function(){ });
+        }
 
