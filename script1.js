@@ -3,12 +3,13 @@
       var tag = document.createElement('script');
 
       tag.src = "https://www.youtube.com/iframe_api";
+      
       var firstScriptTag = document.getElementsByTagName('script')[0];
       firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
 
       // 3. This function creates an <iframe> (and YouTube player)
       //    after the API code downloads.
-      var currentVideo="qjQT26RGjwg";
+      var currentVideo="DPDJpFnUgZw";
 
       //timer per controllare i secondi di video passati prima di salvarlo
       var clock;
@@ -83,7 +84,7 @@
         function caricavideo(data){
             newClock();
             currentVideo=data;
-           player.loadVideoById(data, 0, "large");
+           player.loadVideoById(data, 0, "large");  //"0" secondi di inizio del video
           
         }
 
@@ -96,6 +97,7 @@
            if(ID==vid[i])
               exist=true;
           }
+
           if(!exist){
                 var key=localStorage.getItem("counter");  //counter=valore della prossima chiave libera 
                 if (!key)    //se non esiste già
@@ -174,6 +176,13 @@
                   vid[i]=resSearch.items[i].id.videoId;
               }
             }
+            if (category=="Random") {
+
+              dim=20;
+              for (var i = 0; i < 20; i++) {
+                  vid[i]=resSearch.items[i].id.videoId;
+              }
+            }
             stampa(vid,dim);
             
             //$('img').click(caricavideo,$(this).attr("value"));
@@ -184,6 +193,17 @@
             
        
         }
+        function makeid() {
+            var text = "";
+            var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+            text = possible.charAt(Math.floor(Math.random() * possible.length));
+            return text;
+          }
+
+        
+
+        
+         
         // inserita search luci
         $(document).ready(function(){
           $("#search-button").click(function(e){
@@ -199,9 +219,33 @@
             request.execute(function(response){
               console.log(response);
               resSearch=response;
+               console.log(response.items.length);
             });
           });
-        });
+
+           $("#random-button").click(function(e){
+            console.log("ciao");
+            e.preventDefault();
+            var q = makeid();
+            console.log(q);
+            var request = gapi.client.youtube.search.list({
+                  q:q,
+                  part: 'snippet',
+                  type: 'video',                //servono per far cercare soltanto video musicali
+                  videoCategoryId: '10',
+                  maxResults: 50
+            });
+            request.execute(function(response){
+              console.log(response.items.length);
+              var rnd=Math.floor(Math.random()*response.items.length);
+              console.log(rnd);
+              resSearch=response;
+            });
+          });
+       
+
+
+        }   );
         function init(){
           console.log("pippo");
           gapi.client.setApiKey("AIzaSyCmxhjyAdTBxuEOG_etapCgLYwIBpSmdbQ");
