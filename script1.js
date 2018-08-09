@@ -138,19 +138,23 @@
           });       
         }
         //riempie i recommender
-       function stampa(vid, dim){
+       function stampa(vid, dim,category){
+        //category="#"+category;
+        console.log(category);
         var html="";
           for (var i = 0; i < dim; i++) {
             html+="<img width=7% heigth=7% src ='https://img.youtube.com/vi/"+vid[i]+"/0.jpg' value='"+vid[i]+"'>";
           }
-          $(".tabcontent").html(html);
+          $(".tabcontent#"+category).html(html);
         }
 
        // $('img').click(caricavideo($(this).value));
          
-        var resSearch;
+        var resSearch="";
+        var resSearchR="";
 
         function caricaTab(evt, category) {
+
             var i, tabcontent, tablinks;
             tabcontent = document.getElementsByClassName("tabcontent");
             for (i = 0; i < tabcontent.length; i++) {
@@ -180,10 +184,10 @@
 
               dim=20;
               for (var i = 0; i < 20; i++) {
-                  vid[i]=resSearch.items[i].id.videoId;
+                  vid[i]=resSearchR.items[i].id.videoId;
               }
             }
-            stampa(vid,dim);
+            stampa(vid,dim,category);
             
             //$('img').click(caricavideo,$(this).attr("value"));
            $('img').click(function(){
@@ -209,22 +213,23 @@
           $("#search-button").click(function(e){
             e.preventDefault();
             var q = $('#query').val();
-            console.log(q);
-            var request = gapi.client.youtube.search.list({
-                  q:q,
-                  part: 'snippet',
-                  type: 'video',                //servono per far cercare soltanto video musicali
-                  videoCategoryId: '10'
-            });
-            request.execute(function(response){
-              console.log(response);
-              resSearch=response;
-               console.log(response.items.length);
-            });
+            if(q){
+                var request = gapi.client.youtube.search.list({
+                      q:q,
+                      part: 'snippet',
+                      type: 'video',                //servono per far cercare soltanto video musicali
+                      videoCategoryId: '10'
+                });
+                request.execute(function(response){
+                 // console.log(response);
+                  resSearch=response;
+                  // console.log(response.items.length);
+                });
+            }
           });
 
            $("#random-button").click(function(e){
-            console.log("ciao");
+           // console.log("ciao");
             e.preventDefault();
             var q = makeid();
             console.log(q);
@@ -236,10 +241,10 @@
                   maxResults: 50
             });
             request.execute(function(response){
-              console.log(response.items.length);
+              //console.log(response.items.length);
               var rnd=Math.floor(Math.random()*response.items.length);
-              console.log(rnd);
-              resSearch=response;
+             // console.log(rnd);
+              resSearchR=response;
             });
           });
        
