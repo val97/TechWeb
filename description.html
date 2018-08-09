@@ -1,0 +1,52 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Search</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script>
+$(document).ready(function(){
+	$("#description").click(function(e){
+		e.preventDefault();
+		var q = $('#query').val();
+		var request = gapi.client.youtube.videos.list({
+      'method': 'get',
+      'path': '/youtube/v3/videos',
+        'id': q,
+        'part': 'snippet'
+
+
+
+		});
+		request.execute(function(response){
+
+      document.getElementById('description').innerHTML= "descrizione:"+JSON.stringify(response.items[0].snippet.description);
+      document.getElementById('title').innerHTML= "titolo:"+JSON.stringify(response.items[0].snippet.title);
+
+
+
+
+		});
+	});
+});
+function init(){
+
+	gapi.client.setApiKey("AIzaSyCmxhjyAdTBxuEOG_etapCgLYwIBpSmdbQ");
+	gapi.client.load("youtube","v3",function(){
+
+	});
+}
+
+
+</script>
+  </head>
+  <body>
+    <div id="buttons">
+      <label> <input id="query" type="text"/><button id="description"> vedi descrizione</button></label>
+    </div>
+    <div id="title">
+    </div>
+    <div id="description">
+    </div>
+    <script src="https://apis.google.com/js/client.js?onload=init"></script>
+  </body>
+</html>

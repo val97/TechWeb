@@ -1,0 +1,51 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Search</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script>
+$(document).ready(function(){
+	$("#related").click(function(e){
+		e.preventDefault();
+		var q = $('#query').val();
+		var request = gapi.client.request({
+			'method': 'get',
+      'path': '/youtube/v3/search',
+      'params':{
+        'part': 'snippet',
+        'relatedToVideoId': q,
+        'type': 'video'
+      }
+		});
+		request.execute(function(response){
+
+      var i;
+        for(i=0; i<20; i++){
+
+        $('#container').append("<li> titolo:"+ JSON.stringify(response.items[i].snippet.title) + "</li>");
+        }
+
+
+			console.log(response);
+		});
+	});
+});
+function init(){
+
+	gapi.client.setApiKey("AIzaSyCmxhjyAdTBxuEOG_etapCgLYwIBpSmdbQ");
+	gapi.client.load("youtube","v3",function(){
+
+	});
+}
+</script>
+  </head>
+  <body>
+    <div id="buttons">
+      <label> <input id="query"  type="text"/><button id="related"> related videos</button></label>
+    </div>
+    <ol id="container">
+
+    </ol>
+    <script src="https://apis.google.com/js/client.js?onload=init"></script>
+  </body>
+</html>
