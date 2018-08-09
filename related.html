@@ -7,7 +7,7 @@
 $(document).ready(function(){
 	$("#related").click(function(e){
 		e.preventDefault();
-		var q = $('#query').val();
+		var q = $('#query').val(); // bisogna prendere l'ID del video che si sta riproducendo
 		var request = gapi.client.request({
 			'method': 'get',
       'path': '/youtube/v3/search',
