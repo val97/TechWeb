@@ -1,4 +1,4 @@
-      console.log("ho chiamato lo script");
+ console.log("ho chiamato lo script");
 
       var tag = document.createElement('script');
 
@@ -176,7 +176,7 @@
         var resSearch="";
         var resSearchR="";
 
-        function caricaTab(evt, category) {
+        function caricaTab( category) {
 
             var i, tabcontent, tablinks;
             tabcontent = document.getElementsByClassName("tabcontent");
@@ -187,8 +187,9 @@
             for (i = 0; i < tablinks.length; i++) {
                 tablinks[i].className = tablinks[i].className.replace(" active", "");
             }
+            //NON SO SE SERVONO O COSA FANNO
             document.getElementById(category).style.display = "block";
-            evt.currentTarget.className += " active";
+           // evt.currentTarget.className += " active";
 
             var dim=recommender_size;
             var vid=[recommender_size];
@@ -197,11 +198,16 @@
               dim=caricarecent(vid);
             //stampa(vid,dim);
             if (category=="search") {
-
-              dim=resSearch.items.length;
-              for (var i = 0; i < dim; i++) {
-                  vid[i]=resSearch.items[i].id.videoId;
-                  console.log(resSearch);
+              if(resSearch.items[0].id.videoId==$('#query').val()){ 
+                  dim=0;
+                  caricavideo(resSearch.items[0].id.videoId);
+              }
+              else{
+                  dim=resSearch.items.length;
+                  for (var i = 0; i < dim; i++) {
+                      vid[i]=resSearch.items[i].id.videoId;
+                      console.log(resSearch);
+                  }
               }
             }
             if (category=="Random") {
@@ -240,14 +246,16 @@
             if(q){
                 var request = gapi.client.youtube.search.list({
                       q:q,
-                      part: 'snippet',
+                      part: 'id ,snippet',
                       type: 'video',                //servono per far cercare soltanto video musicali
                       videoCategoryId: '10'
+                     //relatedToVideoId: q
                 });
                 request.execute(function(response){
-                 // console.log(response);
+                  console.log(response);
                   resSearch=response;
                   // console.log(response.items.length);
+                  $('#searched').click(caricaTab('search'));
                 });
             }
           });
@@ -282,4 +290,3 @@
           gapi.client.setApiKey("AIzaSyCmxhjyAdTBxuEOG_etapCgLYwIBpSmdbQ");
           gapi.client.load("youtube","v3",function(){ });
         }
-
