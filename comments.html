@@ -23,8 +23,6 @@ $(document).ready(function(){
           console.log("dentro");
         $('#comments_container').append("<li> autore:"+ JSON.stringify(response.items[i].snippet.topLevelComment.snippet.authorDisplayName) +" testo:"+ JSON.stringify(response.items[i].snippet.topLevelComment.snippet.textOriginal)+"</li>");
         }
-
-
 			//console.log(response);
 		});
 	});
@@ -33,7 +31,6 @@ function init(){
 	console.log("pippo");
 	gapi.client.setApiKey("AIzaSyCmxhjyAdTBxuEOG_etapCgLYwIBpSmdbQ");
 	gapi.client.load("youtube","v3",function(){
-
 	});
 }
 </script>
