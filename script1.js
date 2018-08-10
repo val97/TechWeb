@@ -64,6 +64,29 @@
       function onPlayerStateChange(event) {
        if(event.data == YT.PlayerState.PLAYING){
           startClock();
+
+//            e.preventDefault();
+          var q = currentVideo;
+          var request = gapi.client.request({
+            'method': 'get',
+            'path': '/youtube/v3/commentThreads',
+            'params':{
+              'part': 'snippet, replies',
+              'videoId': q
+            }
+          });
+          request.execute(function(response){
+            console.log("ciao");
+            var i;
+            var html="";  
+              for(i=0; i<response.items.length && i<20   ; i++){
+                console.log("dentro");
+                html+="<li> autore:"+ JSON.stringify(response.items[i].snippet.topLevelComment.snippet.authorDisplayName) +" testo:"+ JSON.stringify(response.items[i].snippet.topLevelComment.snippet.textOriginal)+"</li>";
+             // $('#comments_container').append("<li> autore:"+ JSON.stringify(response.items[i].snippet.topLevelComment.snippet.authorDisplayName) +" testo:"+ JSON.stringify(response.items[i].snippet.topLevelComment.snippet.textOriginal)+"</li>");
+                $('#comments_container').html(html);
+              console.log("<li> autore:"+ JSON.stringify(response.items[i].snippet.topLevelComment.snippet.authorDisplayName) +" testo:"+ JSON.stringify(response.items[i].snippet.topLevelComment.snippet.textOriginal)+"</li>");
+              }
+               });
           //setTimeout(salvarecent,3000,currentVideo);
        }
         if(event.data == YT.PlayerState.PAUSED){
@@ -107,7 +130,7 @@
                 key=key%recommender_size;
                 localStorage.setItem("counter", key);
           }
-          console.log(ID);
+       //   console.log(ID);
         }
         function caricarecent(out){
           var i;
@@ -178,6 +201,7 @@
               dim=resSearch.items.length;
               for (var i = 0; i < dim; i++) {
                   vid[i]=resSearch.items[i].id.videoId;
+                  console.log(resSearch);
               }
             }
             if (category=="Random") {
@@ -232,7 +256,7 @@
            // console.log("ciao");
             e.preventDefault();
             var q = makeid();
-            console.log(q);
+            //console.log(q);
             var request = gapi.client.youtube.search.list({
                   q:q,
                   part: 'snippet',
@@ -247,10 +271,12 @@
               resSearchR=response;
             });
           });
-       
+
+        
+             
 
 
-        }   );
+        });
         function init(){
           console.log("pippo");
           gapi.client.setApiKey("AIzaSyCmxhjyAdTBxuEOG_etapCgLYwIBpSmdbQ");
