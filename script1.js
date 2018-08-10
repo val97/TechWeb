@@ -47,6 +47,7 @@
           height: '390',
           width: '640',
           videoId: 'qjQT26RGjwg',
+          rel: 0, //non inseerisci i video suggeriti da yt nel player
           events: {
             'onReady': onPlayerReady,
             'onStateChange': onPlayerStateChange
@@ -176,7 +177,7 @@
         var resSearch="";
         var resSearchR="";
 
-        function caricaTab( category) {
+        function caricaTab(category) {
 
             var i, tabcontent, tablinks;
             tabcontent = document.getElementsByClassName("tabcontent");
@@ -196,13 +197,15 @@
 
             if(category=="Recent")
               dim=caricarecent(vid);
-            //stampa(vid,dim);
+            
             if (category=="search") {
+              //controllo se sto cercando per id, se vero lancio direttamente il video legato all' id
               if(resSearch.items[0].id.videoId==$('#query').val()){ 
                   dim=0;
                   caricavideo(resSearch.items[0].id.videoId);
               }
-              else{
+              //visualizzo la lista dei video cercati
+              else{     
                   dim=resSearch.items.length;
                   for (var i = 0; i < dim; i++) {
                       vid[i]=resSearch.items[i].id.videoId;
@@ -232,7 +235,7 @@
             var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
             text = possible.charAt(Math.floor(Math.random() * possible.length));
             return text;
-          }
+        }
 
         
 
@@ -249,19 +252,16 @@
                       part: 'id ,snippet',
                       type: 'video',                //servono per far cercare soltanto video musicali
                       videoCategoryId: '10'
-                     //relatedToVideoId: q
                 });
                 request.execute(function(response){
                   console.log(response);
                   resSearch=response;
-                  // console.log(response.items.length);
                   $('#searched').click(caricaTab('search'));
                 });
             }
           });
 
            $("#random-button").click(function(e){
-           // console.log("ciao");
             e.preventDefault();
             var q = makeid();
             //console.log(q);
@@ -273,9 +273,8 @@
                   maxResults: 50
             });
             request.execute(function(response){
-              //console.log(response.items.length);
+            
               var rnd=Math.floor(Math.random()*response.items.length);
-             // console.log(rnd);
               resSearchR=response;
             });
           });
