@@ -52,6 +52,11 @@
 	    background-color: #ddd;
 	}
 
+	div.box{
+		overflow: auto;
+		width:400px ;
+    	height:100px ;
+	}
 	/* Create an active/current tablink class */
 	.tab button.active {
 	    background-color: #ccc;
@@ -100,7 +105,7 @@
 		    	<input class="form-control mr-sm-2" id="query" type="search" placeholder="Search" aria-label="Search">
 		      	<button class="btn btn-outline-success my-2 my-sm-0" id="search-button">Search</button>
 
-		      	<button class="btn btn-outline-success my-2 my-sm-0" id="random-button">Random</button>
+		      	<!--<button class="btn btn-outline-success my-2 my-sm-0" id="random-button">Random</button>-->
 
 		    </form>
 		</div>
@@ -110,7 +115,10 @@
 		<div class="row">
 			<div id="player" class="col-sm-6"></div>
 			<div id="info" class="col-sm-6">
-				<h1>Titolo canzone</h1>		
+				<h1>Titolo canzone</h1>	
+				<div id="comments_container" class=box></div>	
+				</div >
+			    
 			</div>
 		</div>
 	</div>
@@ -120,7 +128,7 @@
 			<!--VARI RACCOMANDER DA SISTEMARE-->
 			<div class="tab">
 				  <button class="tablinks" onclick="caricaTab(event, 'Recent')">Recent</button>
-				  <button class="tablinks" onclick="caricaTab(event, 'Random')">Random</button>
+				  <button class="tablinks"  id="random-button"onclick="caricaTab(event, 'Random')">Random</button>
 				  <button class="tablinks" onclick="caricaTab(event, 'popolarity')">Popolarity</button>
 				  <button class="tablinks" onclick="caricaTab(event, 'search')">Search</button>
 			</div>
