@@ -49,8 +49,8 @@
 	}
 	div.box{
 		overflow: auto;
-		width:400px ;
-    	height:100px ;
+		width:500px ;
+    	height:200px ;
 	}
 	/* Create an active/current tablink class */
 	.tab button.active {
@@ -67,6 +67,18 @@
 	#raccomander{
 		width: 100%;
 	}
+#description_container{
+    background-color: #F0FFF0;
+    border-top: 1px solid grey;
+    font-style: oblique;
+    padding: 2px;
+  }
+
+  #comment_container{
+    border-top: 1px solid grey;
+
+    padding: 2px;
+  }
 </style> 
 
 <body>
@@ -108,9 +120,9 @@
 		<div class="row">
 			<div id="player" class="col-sm-6"></div>
 			<div id="info" class="col-sm-6">
-				<h1>Titolo canzone</h1>	
-				<div id="comments_container" class=box></div>	
-				</div >
+				<div id="title_container" ></div>
+       				 <div id="description_container" class=box></div>
+       				 <div id="comment_container" class=box></div>
 			    
 			</div>
 		</div>
