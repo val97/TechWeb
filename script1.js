@@ -81,14 +81,36 @@
             var i;
             var html="";  
               for(i=0; i<response.items.length && i<20   ; i++){
-                console.log("dentro");
-                html+="<li> autore:"+ JSON.stringify(response.items[i].snippet.topLevelComment.snippet.authorDisplayName) +" testo:"+ JSON.stringify(response.items[i].snippet.topLevelComment.snippet.textOriginal)+"</li>";
+                  html+="<img width='28' heigth='28' src="+JSON.stringify(response.items[i].snippet.topLevelComment.snippet.authorProfileImageUrl)+"> <b> "+ JSON.stringify(response.items[i].snippet.topLevelComment.snippet.authorDisplayName).slice(1,-1) +" </b> <br> "+ JSON.stringify(response.items[i].snippet.topLevelComment.snippet.textOriginal)+"<hr>";
              // $('#comments_container').append("<li> autore:"+ JSON.stringify(response.items[i].snippet.topLevelComment.snippet.authorDisplayName) +" testo:"+ JSON.stringify(response.items[i].snippet.topLevelComment.snippet.textOriginal)+"</li>");
-                $('#comments_container').html(html);
-              console.log("<li> autore:"+ JSON.stringify(response.items[i].snippet.topLevelComment.snippet.authorDisplayName) +" testo:"+ JSON.stringify(response.items[i].snippet.topLevelComment.snippet.textOriginal)+"</li>");
+                $('#comment_container').html(html);
+            //  console.log("<li> autore:"+ JSON.stringify(response.items[i].snippet.topLevelComment.snippet.authorDisplayName) +" testo:"+ JSON.stringify(response.items[i].snippet.topLevelComment.snippet.textOriginal)+"</li>");
               }
                });
           //setTimeout(salvarecent,3000,currentVideo);
+        //DESCRIZIONE E TITOLO
+          var request1 = gapi.client.youtube.videos.list({
+            'method': 'get',
+            'path': '/youtube/v3/videos',
+              'id': q,
+              'part': 'snippet'
+
+
+
+          });
+          request1.execute(function(response){
+            console.log("dentro");
+            //document.getElementById('description').innerHTML= "descrizione:"+JSON.stringify(response.items[0].snippet.description);
+            //document.getElementById('title').innerHTML= "titolo:"+JSON.stringify(response.items[0].snippet.title);
+            var title="";
+            var desc="";
+            title +="<b><h2>"+JSON.stringify(response.items[0].snippet.title)+"</h2></b>";
+            desc += "<p>"+JSON.stringify(response.items[0].snippet.description)+"</p>";
+          $('#description_container').html(desc);
+            $('#title_container').html(title);
+
+          });
+        
        }
         if(event.data == YT.PlayerState.PAUSED){
           stopClock();
