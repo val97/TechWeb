@@ -242,6 +242,29 @@
                   vid[i]=resSearchR.items[i].id.videoId;
               }
             }
+         
+          if(category =="Related"){
+              //console.log("related");
+
+              var request_related = gapi.client.request({
+                'method': 'get',
+                'path': '/youtube/v3/search',
+                'params':{
+                  'part': 'snippet',
+                  'relatedToVideoId': currentVideo,
+                  'type': 'video',
+                  'maxResults':dim
+                }
+              });
+              request_related.execute(function(response){
+                console.log("execute");
+                var i;
+                  for(i=0; i<dim; i++){
+                  //console.log(response.items[i].id.videoId);
+                  vid[i]= response.items[i].id.videoId;
+                }
+              });
+            }
             stampa(vid,dim,category);
             
             //$('img').click(caricavideo,$(this).attr("value"));
