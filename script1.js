@@ -1,4 +1,4 @@
- console.log("ho chiamato lo script");
+console.log("ho chiamato lo script");
 
       var tag = document.createElement('script');
 
@@ -163,6 +163,7 @@
           if (video==null)
             return i;   //dimensione di out
 
+            console.log("caricarecent"+video);
           out[i]= video;     //returna null se l'eselmento non esiste
           }
           return recommender_size;
@@ -189,10 +190,22 @@
       //  console.log(category);
         var html="";
           for (var i = 0; i < dim; i++) {
-            html+="<img width=7% heigth=7% src ='https://img.youtube.com/vi/"+vid[i]+"/0.jpg' value='"+vid[i]+"'>";
+            // vid[j]=vid[i].id.videoId;
+                html += "<div  class='card border-info mb-3' style='width: 16rem;display: inline-block;'>";
+                    html+=" <img class='card-img-top'  src ='https://img.youtube.com/vi/"+vid[i].id.videoId+"/default.jpg' value='"+vid[i].id.videoId+"' alt='Card image cap'>";
+                  html += "<div class='card-body'> <p class='card-text'><b>"+ vid[i].snippet.title +"</b><br>"+vid[i].snippet.channelTitle+"<br>"+ (vid[i].snippet.publishedAt).slice(0,-14)+"</p></div></div> ";
           }
           $(".tabcontent#"+category).html(html);
         }
+        function stampaVecchia(vid, dim,category){
+        //category="#"+category;
+      //  console.log(category);
+        var html="";
+          for (var i = 0; i < dim; i++) {
+            html+="<img width=7% heigth=7% src ='https://img.youtube.com/vi/"+vid[i]+"/0.jpg' value='"+vid[i]+"'>";
+          }
+          $(".tabcontent#"+category).html(html);
+}
 
        // $('img').click(caricavideo($(this).value));
          
@@ -232,8 +245,9 @@
               else{     
                   dim=resSearch.items.length;
                   for (var i = 0; i < dim; i++) {
-                      vid[i]=resSearch.items[i].id.videoId;
-                      console.log(resSearch);
+                      vid[i]=resSearch.items[i];
+
+                      console.log(resSearch.items[i]);
                   }
               }
             }
@@ -245,14 +259,12 @@
               }
             }
 
-            //PROBLEMA:
-            //        DOPO IL PRIMO CLICK RESRAND È VUOTA QUANDO ENTRA IN QUESTO PUNTO
-                      //dOVE VIENE FATTA LA RICERCA RESRAND È PIENA
+           
             if (category=="Random") {
               console.log("risp: "+resRand);
               dim=20;
               for (var i = 0; i < 20; i++) {
-                  vid[i]=resRand.items[i].id.videoId;
+                  vid[i]=resRand.items[i];
               }
             }
          
@@ -271,21 +283,19 @@
             });
             request_related.execute(function(response){
               //console.log(response);
-              var html="";
-
-              for(var j=0; j< recommender_size; j++){
-                vid[j]=response.items[j].id.videoId;
-                html += "<div  class='card border-info mb-3' style='width: 16rem;display: inline-block;'>";
-                    html+=" <img class='card-img-top'  src ='https://img.youtube.com/vi/"+vid[j]+"/default.jpg' value='"+vid[j]+"' alt='Card image cap'>";
-                  html += "<div class='card-body'> <p class='card-text'><b>"+ response.items[j].snippet.title +"</b><br>"+response.items[j].snippet.channelTitle+"<br>"+ (response.items[j].snippet.publishedAt).slice(0,-14)+"</p></div></div> ";
-              }
+              stampa(vid,dim,category)
 
               $(".tabcontent#"+category).html(html);
               console.log(response);
 
             });
             }
-            stampa(vid,dim,category);
+
+
+            if(category=="Recent" || category=="Fvitali")
+              stampaVecchia(vid,dim,category);
+            else
+              stampa(vid,dim,category);
             
             //$('img').click(caricavideo,$(this).attr("value"));
            $('img').click(function(){
@@ -355,12 +365,12 @@
             url: "http://site1825.tw.cs.unibo.it/TW/globpop?id=yRIPU1zZbuk",
             success: function(data) {
 
-              console.log(data);
+             // console.log(data);
               Fvit=data;
               $('#Fvitali-button').click(caricaTab('Fvitali'));
-              console.log(data.recommended.length);
-              console.log(data.recommended[0]);
-              console.log(data.recommended[1]);
+            //  console.log(data.recommended.length);
+             // console.log(data.recommended[0]);
+             // console.log(data.recommended[1]);
              
             },
             error: function(data) {
