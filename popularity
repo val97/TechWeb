@@ -1,29 +1,35 @@
 var MongoClient = require('mongodb').MongoClient;
-var url_DB = "mongodb://localhost:27017/mydb";
+var url_DBass = "mongodb://localhost:27017/DBass";
+var url_DBrel = "mongodb://localhost:27017/DBrel";
 var url = "mongodb://localhost:27017/";
 var debug=true;
 
-//reset();
+reset();
 insert_ass("pippo3");
 findOne_ass("pippo");
 find_ass(2);
+insert_rel("pippo1","pippo2");
+insert_rel("pippo1","pippo2");
+insert_rel("pippo1","pippo3");
+find_rel("pippo2",2);
 
 
-function reset(){			//da chiamare solo una volta all' inizio o per resettare i valori
+function reset(){		//resetta tutto (non so se sia effettivamente necessario usarlo)
 
-	MongoClient.connect(url_DB, function(err, db) {
+	MongoClient.connect(url_DBass, function(err, db) {
 		if (err) throw err;
-		if(debug) console.log("Database created!");
+		if(debug) console.log("Database ass created!");
+		db.close();
+	});
+	MongoClient.connect(url_DBrel, function(err, db) {
+		if (err) throw err;
+		if(debug) console.log("Database rel created!");
 		db.close();
 	});
 	
 	MongoClient.connect(url, function(err, db) {
 		if (err) throw err;
-		var dbo = db.db("mydb");
-		/*dbo.collection("ass").drop(function(err, delOK) {
-    			if (err) throw err;
-    			if (delOK) if(debug) console.log("Collection deleted");
-  		});*/	
+		var dbo = db.db("DBass");
 		dbo.createCollection("ass", function(err, res) {
 			if (err) throw err;
 			if(debug) console.log("Collection assolute created!");
@@ -33,7 +39,7 @@ function reset(){			//da chiamare solo una volta all' inizio o per resettare i v
 	});
 	MongoClient.connect(url, function(err, db) {
   		if (err) throw err;
-  		var dbo = db.db("mydb");
+  		var dbo = db.db("DBass");
   		dbo.collection("ass").deleteMany({}, function(err, obj) {
     			if (err) throw err;
     			console.log(obj.result.n + " document(s) deleted");
@@ -41,10 +47,10 @@ function reset(){			//da chiamare solo una volta all' inizio o per resettare i v
   		});
 	});
 };
-function insert_ass(vid_id){				//processa l'effetto della visione di un video (modificando in modo opportuno il DB)
+function insert_ass(vid_id){			//salva la visualizzazione del video vid_id
 	MongoClient.connect(url, function(err, db) {
 		if (err) throw err;
-  		var dbo = db.db("mydb");
+  		var dbo = db.db("DBass");
 		dbo.collection("ass").findOne({id: vid_id},{}, function(err, result) {		//{id: "id del video in questione",
 			if (err) throw err;							// num: "numero visualizzazioni"}
 			if(result==null){
@@ -65,17 +71,49 @@ function insert_ass(vid_id){				//processa l'effetto della visione di un video (
 				});
 			}
 			if(debug) console.log(result);
-		});
-		setTimeout(function() {
 			db.close();
-		}, 1000);
+		});
+		/*setTimeout(function() {
+			
+		}, 1000);*/
 	});
 	
 };
-function findOne_ass(vid_id){			//per debuggare, trova le info relative ad uno specifico id
+function insert_rel(from_id,to_id){			//salva la visualizzazione del video to_id, dopo aver visto from_id
 	MongoClient.connect(url, function(err, db) {
 		if (err) throw err;
-  		var dbo = db.db("mydb");
+  		var dbo = db.db("DBrel");
+		dbo.collection(from_id).findOne({id: to_id},{}, function(err, result) {		//{id: "id del video in questione",
+			if (err) throw err;							// num: "numero visualizzazioni"}
+			if(result==null){
+				if(debug) console.log("video non esistente");
+				var video = {id:to_id, num: 1}
+				dbo.collection(from_id).insertOne(video, function(err, res) {
+					if (err) throw err;
+					
+				});
+
+			}else{
+				var myquery = {id:to_id}
+				var newvalues = { $set: {num: result.num+1} };
+				dbo.collection(from_id).updateOne(myquery, newvalues, function(err, res) {
+					if (err) throw err;
+					if(debug) console.log("1 document updated");
+				
+				});
+			}
+			if(debug) console.log(result);
+			db.close();
+		});
+		
+	});
+	
+};
+
+function findOne_ass(vid_id){				//per debug, trova numero di visualizzazioni di vid_id
+	MongoClient.connect(url, function(err, db) {
+		if (err) throw err;
+  		var dbo = db.db("DBass");
 		dbo.collection("ass").findOne({id: vid_id},{}, function(err, result) {		//{id: "id del video in questione",
 			if (err) throw err;							// num: "numero visualizzazioni"}
 			if(debug) console.log(result);
@@ -84,13 +122,27 @@ function findOne_ass(vid_id){			//per debuggare, trova le info relative ad uno s
 	});
 	
 };
-function find_ass(n){			//trova gli n video piu visualizzati
+function find_ass(n){				//trova gli n video piu visualizzati
 	MongoClient.connect(url, function(err, db) {
 		if (err) throw err;
-  		var dbo = db.db("mydb");
+  		var dbo = db.db("DBass");
 		dbo.collection("ass").find().sort({num:-1}).limit(n).toArray(function(err,result){
 			if (err) throw err;
 			if(debug) console.log("find_ass:");
+    			if(debug) console.log(result);
+			
+    			db.close();
+		});
+	});
+	
+};
+function find_rel(from_id,n){			//trova gli n video piu visualizzati dopo aver visualizzato from_id
+	MongoClient.connect(url, function(err, db) {
+		if (err) throw err;
+  		var dbo = db.db("DBrel");
+		dbo.collection(from_id).find().sort({num:-1}).limit(n).toArray(function(err,result){
+			if (err) throw err;
+			if(debug) console.log("find_rel:");
     			if(debug) console.log(result);
 			
     			db.close();
