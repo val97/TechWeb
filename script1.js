@@ -275,7 +275,7 @@
 
               for(var j=0; j< recommender_size; j++){
                 vid[j]=response.items[j].id.videoId;
-                html += "<div  class='card border-info mb-3' style='width: 16rem;'>";
+                html += "<div  class='card border-info mb-3' style='width: 16rem;display: inline-block;'>";
                     html+=" <img class='card-img-top'  src ='https://img.youtube.com/vi/"+vid[j]+"/default.jpg' value='"+vid[j]+"' alt='Card image cap'>";
                   html += "<div class='card-body'> <p class='card-text'><b>"+ response.items[j].snippet.title +"</b><br>"+response.items[j].snippet.channelTitle+"<br>"+ (response.items[j].snippet.publishedAt).slice(0,-14)+"</p></div></div> ";
               }
