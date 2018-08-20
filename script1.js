@@ -260,23 +260,30 @@
               //console.log("related");
 
               var request_related = gapi.client.request({
-                'method': 'get',
-                'path': '/youtube/v3/search',
-                'params':{
-                  'part': 'snippet',
-                  'relatedToVideoId': currentVideo,
-                  'type': 'video',
-                  'maxResults':dim
-                }
-              });
-              request_related.execute(function(response){
-                console.log("execute");
-                var i;
-                  for(i=0; i<dim; i++){
-                  //console.log(response.items[i].id.videoId);
-                  vid[i]= response.items[i].id.videoId;
-                }
-              });
+              'method': 'get',
+              'path': '/youtube/v3/search',
+              'params':{
+                'part': 'snippet',
+                'relatedToVideoId': currentVideo,
+                'type': 'video',
+                'maxResults':recommender_size
+              }
+            });
+            request_related.execute(function(response){
+              //console.log(response);
+              var html="";
+
+              for(var j=0; j< recommender_size; j++){
+                vid[j]=response.items[j].id.videoId;
+                html += "<div  class='card border-info mb-3' style='width: 16rem;'>";
+                    html+=" <img class='card-img-top'  src ='https://img.youtube.com/vi/"+vid[j]+"/default.jpg' value='"+vid[j]+"' alt='Card image cap'>";
+                  html += "<div class='card-body'> <p class='card-text'><b>"+ response.items[j].snippet.title +"</b><br>"+response.items[j].snippet.channelTitle+"<br>"+ (response.items[j].snippet.publishedAt).slice(0,-14)+"</p></div></div> ";
+              }
+
+              $(".tabcontent#"+category).html(html);
+              console.log(response);
+
+            });
             }
             stampa(vid,dim,category);
             
