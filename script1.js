@@ -106,7 +106,7 @@
             var desc="";
             title +="<b><h2>"+JSON.stringify(response.items[0].snippet.title)+"</h2></b>";
             desc += "<p>"+JSON.stringify(response.items[0].snippet.description)+"</p>";
-          $('#description_container').html(desc);
+             $('#description_container').html(desc);
             $('#title_container').html(title);
 
           });
@@ -130,7 +130,7 @@
         function caricavideo(data){
             newClock();
             currentVideo=data;
-           player.loadVideoById(data, 0, "large");  //"0" secondi di inizio del video
+            player.loadVideoById(data, 0, "large");  //"0" secondi di inizio del video
           
         }
 
@@ -186,7 +186,7 @@
         //riempie i recommender
        function stampa(vid, dim,category){
         //category="#"+category;
-        console.log(category);
+      //  console.log(category);
         var html="";
           for (var i = 0; i < dim; i++) {
             html+="<img width=7% heigth=7% src ='https://img.youtube.com/vi/"+vid[i]+"/0.jpg' value='"+vid[i]+"'>";
@@ -197,9 +197,11 @@
        // $('img').click(caricavideo($(this).value));
          
         var resSearch="";
-        var resSearchR="";
+        var resRand="";
+        var Fvit="";
 
         function caricaTab(category) {
+            console.log(category);
 
             var i, tabcontent, tablinks;
             tabcontent = document.getElementsByClassName("tabcontent");
@@ -235,11 +237,22 @@
                   }
               }
             }
-            if (category=="Random") {
+            if(category=="Fvitali"){
+              dim=Fvit.recommended.length;
+              for (var i = 0; i <dim; i++) {
+                console.log(Fvit.recommended[i]);
+                vid[i]=Fvit.recommended[i].videoID;
+              }
+            }
 
+            //PROBLEMA:
+            //        DOPO IL PRIMO CLICK RESRAND È VUOTA QUANDO ENTRA IN QUESTO PUNTO
+                      //dOVE VIENE FATTA LA RICERCA RESRAND È PIENA
+            if (category=="Random") {
+              console.log("risp: "+resRand);
               dim=20;
               for (var i = 0; i < 20; i++) {
-                  vid[i]=resSearchR.items[i].id.videoId;
+                  vid[i]=resRand.items[i].id.videoId;
               }
             }
          
@@ -287,7 +300,8 @@
         
          
         // inserita search luci
-        $(document).ready(function(){
+
+        $(document).ready(function(){   
           $("#search-button").click(function(e){
             e.preventDefault();
             var q = $('#query').val();
@@ -320,12 +334,33 @@
             request.execute(function(response){
             
               var rnd=Math.floor(Math.random()*response.items.length);
-              resSearchR=response;
+              resRand=response;
+              $('#random-button').click(caricaTab('Random'));
+               console.log(response);
+               console.log(resRand);
             });
           });
 
         
+         $("#Fvitali-button").click(function(e){
+            $.ajax({
+
+            url: "http://site1825.tw.cs.unibo.it/TW/globpop?id=yRIPU1zZbuk",
+            success: function(data) {
+
+              console.log(data);
+              Fvit=data;
+              $('#Fvitali-button').click(caricaTab('Fvitali'));
+              console.log(data.recommended.length);
+              console.log(data.recommended[0]);
+              console.log(data.recommended[1]);
              
+            },
+            error: function(data) {
+              alert("Caricamento impossibile");
+            }
+          });    
+          });    
 
 
         });
@@ -333,4 +368,4 @@
           console.log("pippo");
           gapi.client.setApiKey("AIzaSyCmxhjyAdTBxuEOG_etapCgLYwIBpSmdbQ");
           gapi.client.load("youtube","v3",function(){ });
-        }
+}

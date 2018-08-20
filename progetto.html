@@ -73,10 +73,8 @@
     font-style: oblique;
     padding: 2px;
   }
-
   #comment_container{
     border-top: 1px solid grey;
-
     padding: 2px;
   }
 </style> 
@@ -133,10 +131,12 @@
 			<!--VARI RACCOMANDER DA SISTEMARE-->
 			<div class="tab">
 				  <button class="tablinks" onclick="caricaTab('Recent')">Recent</button>
-				  <button class="tablinks"  id="random-button"onclick="caricaTab( 'Random')">Random</button>
+				  <button class="tablinks"  id="random-button">Random</button>
 				  <button class="tablinks" onclick="caricaTab(event, 'popolarity')">Popolarity</button>
-				  <button class="tablinks" id="searched"onclick="caricaTab( 'search')">Search</button>
-				<button class="tablinks" onclick="caricaTab(event, 'Related')">Related</button>
+				  <button class="tablinks" id="searched">Search</button>
+				<button class="tablinks" onclick="caricaTab('Related')">Related</button>
+				<button class="tablinks" id="Fvitali-button">Fvitali</button>
+
 			</div>
 
 			<div id="Recent" class="tabcontent">
@@ -160,6 +160,10 @@
 			<div id="Related" class="tabcontent">
 			  <h3> Related </h3>
 
+			</div>
+			<div id="Fvitali" class="tabcontent">
+			  <h3>Recent</h3>
+			
 			</div>
 				
 		</div>
