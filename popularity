@@ -9,7 +9,7 @@ findOne_ass("pippo");
 find_ass(2);
 
 
-function reset(){
+function reset(){			//da chiamare solo una volta all' inizio o per resettare i valori
 
 	MongoClient.connect(url_DB, function(err, db) {
 		if (err) throw err;
@@ -41,7 +41,7 @@ function reset(){
   		});
 	});
 };
-function insert_ass(vid_id){
+function insert_ass(vid_id){				//processa l'effetto della visione di un video (modificando in modo opportuno il DB)
 	MongoClient.connect(url, function(err, db) {
 		if (err) throw err;
   		var dbo = db.db("mydb");
@@ -72,7 +72,7 @@ function insert_ass(vid_id){
 	});
 	
 };
-function findOne_ass(vid_id){
+function findOne_ass(vid_id){			//per debuggare, trova le info relative ad uno specifico id
 	MongoClient.connect(url, function(err, db) {
 		if (err) throw err;
   		var dbo = db.db("mydb");
@@ -84,7 +84,7 @@ function findOne_ass(vid_id){
 	});
 	
 };
-function find_ass(n){
+function find_ass(n){			//trova gli n video piu visualizzati
 	MongoClient.connect(url, function(err, db) {
 		if (err) throw err;
   		var dbo = db.db("mydb");
