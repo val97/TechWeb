@@ -9,7 +9,7 @@ console.log("ho chiamato lo script");
 
       // 3. This function creates an <iframe> (and YouTube player)
       //    after the API code downloads.
-      var currentVideo="DPDJpFnUgZw";
+      var currentVideo="8of3uhG1tCI";
 
       //timer per controllare i secondi di video passati prima di salvarlo
       var clock;
@@ -46,7 +46,7 @@ console.log("ho chiamato lo script");
         player = new YT.Player('player', {
           height: '390',
           width: '640',
-          videoId: 'qjQT26RGjwg',
+          videoId: '8of3uhG1tCI',
           rel: 0, //non inseerisci i video suggeriti da yt nel player
           events: {
             'onReady': onPlayerReady,
@@ -187,15 +187,21 @@ console.log("ho chiamato lo script");
         //riempie i recommender
        function stampa(vid, dim,category){
         //category="#"+category;
-      //  console.log(category);
+        
         var html="";
           for (var i = 0; i < dim; i++) {
+            console.log("stampa: "+vid[i].id.videoId);
             // vid[j]=vid[i].id.videoId;
                 html += "<div  class='card border-info mb-3' style='width: 16rem;display: inline-block;'>";
                     html+=" <img class='card-img-top'  src ='https://img.youtube.com/vi/"+vid[i].id.videoId+"/default.jpg' value='"+vid[i].id.videoId+"' alt='Card image cap'>";
                   html += "<div class='card-body'> <p class='card-text'><b>"+ vid[i].snippet.title +"</b><br>"+vid[i].snippet.channelTitle+"<br>"+ (vid[i].snippet.publishedAt).slice(0,-14)+"</p></div></div> ";
           }
           $(".tabcontent#"+category).html(html);
+
+           $('img').click(function(){
+                console.log($(this).attr("value"));
+                caricavideo($(this).attr("value"));
+           });
         }
         function stampaVecchia(vid, dim,category){
         //category="#"+category;
@@ -212,6 +218,7 @@ console.log("ho chiamato lo script");
         var resSearch="";
         var resRand="";
         var Fvit="";
+        var resRel="";
 
         function caricaTab(category) {
             console.log(category);
@@ -283,24 +290,29 @@ console.log("ho chiamato lo script");
             });
             request_related.execute(function(response){
               //console.log(response);
+              resRel=response;
+              for(i=0;i<recommender_size;i++){
+                vid[i]=resRel.items[i];
+                console.log(vid[i].id.videoId);
+              }
               stampa(vid,dim,category)
-
-              $(".tabcontent#"+category).html(html);
-              console.log(response);
 
             });
             }
 
 
-            if(category=="Recent" || category=="Fvitali")
+            if(category=="Recent" || category=="Fvitali"){
               stampaVecchia(vid,dim,category);
+              $('img').click(function(){
+                console.log($(this).attr("value"));
+                caricavideo($(this).attr("value"));
+               });
+           
+            }
             else
               stampa(vid,dim,category);
             
             //$('img').click(caricavideo,$(this).attr("value"));
-           $('img').click(function(){
-                caricavideo($(this).attr("value"));
-           });
            
             
        
