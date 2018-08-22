@@ -392,7 +392,7 @@ console.log("ho chiamato lo script");
          $("#Fvitali-button").click(function(e){
             $.ajax({
 
-            url: "http://site1825.tw.cs.unibo.it/TW/globpop?id=yRIPU1zZbuk",
+            url: "http://site1825.tw.cs.unibo.it/TW/globpop?"+"?id="+currentVideo,
             success: function(data) {
 
              // console.log(data);
