@@ -185,36 +185,33 @@ console.log("ho chiamato lo script");
           });       
         }
         //riempie i recommender
-       function stampa(vid, dim,category){
+       function stampa(vid, dim,category,info){
         //category="#"+category;
         
         var html="";
-          for (var i = 0; i < dim; i++) {
-            console.log("stampa: "+vid[i].id.videoId);
-            // vid[j]=vid[i].id.videoId;
+          for (var i = 0; i < dim-1; i++) {
+            if(info){
                 html += "<div  class='card border-info mb-3' style='width: 16rem;display: inline-block;'>";
-                    html+=" <img class='card-img-top'  src ='https://img.youtube.com/vi/"+vid[i].id.videoId+"/default.jpg' value='"+vid[i].id.videoId+"' alt='Card image cap'>";
-                  html += "<div class='card-body'> <p class='card-text'><b>"+ vid[i].snippet.title +"</b><br>"+vid[i].snippet.channelTitle+"<br>"+ (vid[i].snippet.publishedAt).slice(0,-14)+"</p></div></div> ";
+                html+=" <img class='card-img-top'  src ='https://img.youtube.com/vi/"+vid[i].id.videoId+"/default.jpg' value='"+vid[i].id.videoId+"' alt='Card image cap'>";
+                html += "<div class='card-body'> <p class='card-text'><b>"+ vid[i].snippet.title +"</b><br>"+vid[i].snippet.channelTitle+"<br>"+ (vid[i].snippet.publishedAt).slice(0,-14)+"</p></div></div> ";
+
+            } else{
+                html += "<div  class='card border-info mb-3' style='width: 16rem; display: inline-block;'>";
+                html+=" <img class='card-img-top'  src ='https://img.youtube.com/vi/"+vid[i].id+"/default.jpg' value='"+vid[i].id+"' alt='Card image cap'></div>";
+                html += "<div class='card-body'> <p class='card-text'><b>"+ vid[i].snippet.title +"</b><br>"+vid[i].snippet.channelTitle+"<br>"+ (vid[i].snippet.publishedAt).slice(0,-14)+"</p></div></div> ";
+            }
+          
+           
+            
           }
           $(".tabcontent#"+category).html(html);
 
-           $('img').click(function(){
+          $('img').click(function(){
                 console.log($(this).attr("value"));
                 caricavideo($(this).attr("value"));
-           });
+          });
         }
-        function stampaVecchia(vid, dim,category){
-        //category="#"+category;
-      //  console.log(category);
-        var html="";
-          for (var i = 0; i < dim; i++) {
-            html+="<img width=7% heigth=7% src ='https://img.youtube.com/vi/"+vid[i]+"/0.jpg' value='"+vid[i]+"'>";
-          }
-          $(".tabcontent#"+category).html(html);
-}
-
-       // $('img').click(caricavideo($(this).value));
-         
+       
         var resSearch="";
         var resRand="";
         var Fvit="";
@@ -232,15 +229,44 @@ console.log("ho chiamato lo script");
             for (i = 0; i < tablinks.length; i++) {
                 tablinks[i].className = tablinks[i].className.replace(" active", "");
             }
-            //NON SO SE SERVONO O COSA FANNO
+            //serve per inserire le immagini nel tab
             document.getElementById(category).style.display = "block";
-           // evt.currentTarget.className += " active";
-
+           
             var dim=recommender_size;
             var vid=[recommender_size];
+            var info=true;
 
-            if(category=="Recent")
+            function takeInfoById(j){
+              $.ajax({
+                           url: 'https://www.googleapis.com/youtube/v3/videos?key=' + 'AIzaSyCmxhjyAdTBxuEOG_etapCgLYwIBpSmdbQ' + '&id=' + vid[j] + '&part=snippet',
+                           success: function(data){
+                            // console.log(data.items[0].snippet.title);
+                              vid[j]=data.items[0];
+                              j++;
+                              console.log(data.items[0]);
+                            
+                           } ,
+                           complete: function(){
+                             // console.log(vid[j].id);
+                              if(j<20)
+                                takeInfoById(j);
+                              if(j==19)
+                                stampa(vid,dim,category,info);
+                           }
+                        });
+            }
+
+
+            if(category=="Recent"){
+              info=false
               dim=caricarecent(vid);
+              var j=0;
+
+              takeInfoById(j);
+              console.log(vid);
+                   
+              }
+                
             
             if (category=="search") {
               //controllo se sto cercando per id, se vero lancio direttamente il video legato all' id
@@ -253,17 +279,21 @@ console.log("ho chiamato lo script");
                   dim=resSearch.items.length;
                   for (var i = 0; i < dim; i++) {
                       vid[i]=resSearch.items[i];
-
                       console.log(resSearch.items[i]);
                   }
+
               }
             }
             if(category=="Fvitali"){
               dim=Fvit.recommended.length;
               for (var i = 0; i <dim; i++) {
-                console.log(Fvit.recommended[i]);
+                //console.log(Fvit.recommended[i]);
                 vid[i]=Fvit.recommended[i].videoID;
-              }
+
+              } 
+              info =false;
+              var j=0;
+                  takeInfoById(j);
             }
 
            
@@ -295,27 +325,15 @@ console.log("ho chiamato lo script");
                 vid[i]=resRel.items[i];
                 console.log(vid[i].id.videoId);
               }
-              stampa(vid,dim,category)
+              stampa(vid,dim,category,info)
 
             });
             }
 
 
-            if(category=="Recent" || category=="Fvitali"){
-              stampaVecchia(vid,dim,category);
-              $('img').click(function(){
-                console.log($(this).attr("value"));
-                caricavideo($(this).attr("value"));
-               });
-           
-            }
-            else
-              stampa(vid,dim,category);
-            
-            //$('img').click(caricavideo,$(this).attr("value"));
-           
-            
-       
+          
+              stampa(vid,dim,category,info);
+      
         }
         function makeid() {
             var text = "";
