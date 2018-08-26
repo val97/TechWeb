@@ -1,0 +1,129 @@
+var MongoClient = require('mongodb').MongoClient;
+var locpop = require ('./popularity0.1.js');
+var https = require('http');
+var url = "mongodb://localhost:27017/";
+var gruppi=["1828","1838"];		//andrebbe aggiunto "1829" e risolto il caso di server fuori servizio
+
+//locpop.reset();
+//preUpdate();
+//locpop.find_ass("globAss",200);
+//save("globAss","serverAss");
+//locpop.find_ass("serverAss",200);
+
+function keep_update(){
+	while(true){
+		preUpdate();
+		save("globAss","serverAss");
+	}
+	
+
+}
+function preUpdate(){
+	var prom=new Promise(function(resolve,reject){
+		MongoClient.connect(url, function(err, db) {
+	  		if (err) throw err;
+	  		var dbo = db.db("mydb");
+	  		dbo.collection("globAss").deleteMany({}, function(err, obj) {
+	    			if (err) throw err;
+	    			console.log(obj.result.n + " document(s) deleted");
+				update();
+	    			db.close();
+	  		});
+		});
+	});
+	return prom;
+}
+function update(){
+	console.log("update");
+	
+	var prom=insertOurs();
+	prom.then(function(){
+		for(var i=0;i<gruppi.length;i++){
+			var uri="http://site"+gruppi[i]+".tw.cs.unibo.it/globpop";
+			https.get(uri, (resp) => {
+  			var data = '';
+		
+		  	// A chunk of data has been recieved.
+		  	resp.on('data', (chunk) => {
+		    		data += chunk;
+		  	});
+			
+  			// The whole response has been received. Print out the result.
+  			resp.on('end', () => {
+				var obj=JSON.parse(data)
+				updateRec(0,obj.recommended);	
+				console.log(obj);
+				console.log("ended");
+  			});
+		
+			}).on("error", (err) => {
+		  		console.log("Error: " + err.message);
+			});
+		}
+	}).catch(function(fromResolve){
+		//insertOursRec(i+1,length,result);
+	});
+}	
+function updateRec(i,data){
+	if(i<data.length){
+		
+		var id="";			
+		if(data[i].videoId!=null)
+			id=data[i].videoId;
+		else
+			if(data[i].videoID!=null)
+				id=data[i].videoID;
+		var num=data[i].timesWatched;
+		var prom=locpop.insert_ass("globAss",id,num);		//salva l'elemento i-esimo
+		prom.then(function(){
+			updateRec(i+1,data);
+		}).catch(function(fromResolve){
+			//insertOursRec(i+1,length,result);
+		});
+	}
+}
+function insertOurs(){
+	var prom=new Promise(function(resolve,reject){
+		MongoClient.connect(url, function(err, db) {
+			if (err) throw err;
+  			var dbo = db.db("mydb");
+			dbo.collection("ass").find().toArray(function(err,result){
+				if (err) throw err;
+				console.log("insertOurs:");
+				/*for(var i=0;i<result.length;i++){
+					locpop.insert_ass("glob",result[i].id,result[i].num);
+				}*/
+				console.log(result);
+				insertOursRec(0,result);
+				resolve();
+    				db.close();
+			});
+		});
+	});
+	return prom;
+}
+function insertOursRec(i,result){
+	if(i<result.length){
+		var prom=locpop.insert_ass("globAss",result[i].id,result[i].num);
+		prom.then(function(){
+			insertOursRec(i+1,result);
+		}).catch(function(fromResolve){
+			//insertOursRec(i+1,length,result);
+		})
+	}
+}
+function save(from,to){	//salva i risultati ottenuti in una collezione pronta per essere "letta" dagli utenti
+	MongoClient.connect(url, function(err, db) {
+		if (err) throw err;
+  		var dbo = db.db("mydb");
+		dbo.collection(from).find().toArray(function(err,result){
+			console.log("save:");
+			console.log(result);
+			dbo.collection(to).insertMany(result, function(err, res) {
+    				if (err) throw err;
+    				console.log("Number of documents inserted: " + res.insertedCount);
+    				db.close();
+  			});
+		});
+	});
+}
