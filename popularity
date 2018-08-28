@@ -5,14 +5,25 @@ var debug=true;
 var gruppi=["1828","1838"];
 var collection=["ass","rel"];
 var MAXVID=20;
-var is_updating[false,false];
+var is_updating=[false,false];
 
 //reset();
 
-insertLocAss("LocID1");
-insertLocRel("locDaID","locDaID");
-insertGlobAss("globID1",5,0);		//id,num visualizzazioni,gruppo i-esimo
-insertGlobRel("globID","globID",6,1);	//analogo
+//insertLocAss("LocID1");
+//insertLocRel("locDaID","locDaID");
+//insertGlobAss("globID1",5,0);		//id,num visualizzazioni,gruppo i-esimo
+//insertGlobRel("globID","globID",6,1);	//analogo
+//findLocAss();
+//findGlobAss();
+//findAll("ass");
+//updateAll();
+exports.gruppi=gruppi;
+exports.insert=insert;
+exports.insertLocAss=insertLocAss;
+exports.updateAll=updateAll;
+exports.findAll=findAll;
+exports.findLocAss=findLocAss;
+exports.findGlobAss=findGlobAss;
 
 
 function reset(){		//resetta tutto (non so se sia effettivamente necessario usarlo)
@@ -73,8 +84,7 @@ function insert(from_id,to_id,n,i){
 //from_id/to_id: da quale video(from_id) viene visualizzato quale video(to_id) 		
 //n:che valore ci metto
 //i:quale gruppo sta salvando le visualizzazioni	-1 se e' locale
-	console.log(i);
-	console.log("inseert_ass");
+	console.log("inseert: from_id: "+from_id+" to_id: "+to_id+" num: "+n+" gruppo: "+gruppi[i]);
 	var prom=new Promise(function(resolve,reject){
 		MongoClient.connect(url, function(err, db) {
 			if (err) throw err;
@@ -91,12 +101,14 @@ function insert(from_id,to_id,n,i){
 			if(i==-1){
 				dbo.collection(collection).update(query, {$inc:{num:n}},{ upsert: true }, function(err, res) {
 					if (err) throw err;
+					resolve();
 					db.close();
 				});
 			}else{
 				query.from=gruppi[i];
 				dbo.collection(collection).update(query,{$set:{num:n}},{ upsert: true }, function(err, res) {
 					if (err) throw err;
+					resolve();
 					db.close();
 				});
 			}
@@ -132,7 +144,6 @@ function updateAll(){
 	updateTot(false);
 }
 function updateTot(is_ass){
-	console.log("pippo");
 	MongoClient.connect(url, function(err, db) {
 		if (err) throw err;
   		var dbo = db.db("mydb");
@@ -244,7 +255,6 @@ function findGlobRel(vid_id){
 	find(MAXVID,vid_id,false);
 }
 function find(n,from_id,is_local){				//trova gli n video piu visualizzati
-	console.log("pippo");
 	MongoClient.connect(url, function(err, db) {
 		if (err) throw err;
   		var dbo = db.db("mydb");
