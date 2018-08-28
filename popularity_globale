@@ -1,24 +1,163 @@
 var MongoClient = require('mongodb').MongoClient;
-var locpop = require ('./popularity0.1.js');
+var locpop = require ('./popularity0.4.js');
 var https = require('http');
 var url = "mongodb://localhost:27017/";
-var gruppi=["1828","1838"];		//andrebbe aggiunto "1829" e risolto il caso di server fuori servizio
+var gruppi=locpop.gruppi;		
 
 //locpop.reset();
 //preUpdate();
 //locpop.find_ass("globAss",200);
 //save("globAss","serverAss");
 //locpop.find_ass("serverAss",200);
+//keep_update();
 
-function keep_update(){
-	while(true){
-		preUpdate();
-		save("globAss","serverAss");
+//updateGruppiAss(0,0,);
+//locpop.find_ass("1828",200);
+//saveAss(0);
+
+keepUpdatingAss();
+//console.log(locpop.gruppi);
+
+function keepUpdatingAss(){
+	console.log("in keepUpdatingAss()");
+	updateAss(0);
+	var prom= updateAss(0);
+	prom.then(function(){
+		locpop.updateAll();
+		//dovrei metterci anche updateRel() qui
+		keepUpdatingAss();
+	});
+}
+function updateAss(i){
+	var prom=new Promise(function(resolve,reject){
+		console.log("in updateAss()");
+		if(i<gruppi.length){
+			var uri="http://site"+gruppi[i]+".tw.cs.unibo.it/globpop";
+			https.get(uri, (resp) => {
+		  		var data = '';
+					  	// A chunk of data has been recieved.
+			 	resp.on('data', (chunk) => {
+			   		data += chunk;
+			 	});
+		
+				// The whole response has been received. Print out the result.
+				resp.on('end', () => {
+					var obj=JSON.parse(data);
+					//updateGruppiAss(0,i,obj.recommended);
+					var prom=updateGruppiAss(0,i,obj.recommended);
+					prom.then(function(){
+						prom2=updateAss(i+1);
+						prom2.then(function(){
+							resolve();
+						});
+					});
+					//console.log(obj.recommended);
+					console.log("ended");
+				});
+		
+			}).on("error", (err) => {
+				updateAss(i+1);
+				console.log("Error: " + err.message);
+			});
+		}else{
+			
+			resolve();
+		}
+	});
+	return prom;
+	
+}
+function updateGruppiAss(i,j,data){
+	var prom=new Promise(function(resolve,reject){
+		console.log("in updateGruppiAss() i:"+i+" j:"+j);
+		if(i<data.length){
+		
+			var id="";			
+			if(data[i].videoId!=null)
+				id=data[i].videoId;
+			else
+				if(data[i].videoID!=null)
+					id=data[i].videoID;
+			var num=data[i].timesWatched;
+			if(id!=""){
+				//locpop.insert(id,null,num,j);	
+				var prom1=locpop.insert(id,null,num,j);		
+				prom1.then(function(){
+					//updateGruppiAss(i+1,j,data);
+					var prom2=updateGruppiAss(i+1,j,data);
+					prom2.then(function(){
+						resolve();
+					});
+				});
+			}else{
+				//updateGruppiAss(i+1,j,data);
+				var prom2=updateGruppiAss(i+1,j,data);
+				prom2.then(function(){
+					resolve();
+				});
+			}
+		}else
+			resolve();
+	});
+	return prom;
+	
+}
+function saveAss(i){
+	if(i<gruppi.length){
+		console.log("pippo");
+		MongoClient.connect(url, function(err, db) {
+			if (err) throw err;
+	  		var dbo = db.db("mydb");
+			dbo.collection(gruppi[i]).find().toArray(function(err,result){
+				for (var j=0;j<result.length;j++){
+					insertServerAss(result.id,0,j,0);
+				}
+				saveAss(i+1);
+    				db.close();
+			});
+			db.close();
+		});
+		
 	}
+}
+function insertServerAss(id,i,j,sum){
+	MongoClient.connect(url, function(err, db) {
+		if (err) throw err;
+  		var dbo = db.db("mydb");
+		dbo.collection("pippo").findOne({id:id},{},function(err,result){
+			if (err) throw err;
+			console.log("insert server ass:");
+    			console.log(result);
+			
+    			db.close();
+		});
+	});
+}
+
+
+
+
+
+/*
+function keep_update(){
+	var prom=preUpdate();
+	prom.then(function(){
+		var prom2=update(0);
+		for(var i=0;i<gruppi.length;i++){
+			prom2= prom2.then(function(){
+				return update(0+1);
+			
+			});
+		}
+	//save("globAss","serverAss");
+	});
+	//save("globAss","serverAss");
+	
 	
 
 }
-function preUpdate(){
+function preUpdate(){				//non serve
+	console.log("pre updating");
 	var prom=new Promise(function(resolve,reject){
 		MongoClient.connect(url, function(err, db) {
 	  		if (err) throw err;
@@ -26,19 +165,34 @@ function preUpdate(){
 	  		dbo.collection("globAss").deleteMany({}, function(err, obj) {
 	    			if (err) throw err;
 	    			console.log(obj.result.n + " document(s) deleted");
-				update();
+				resolve();
 	    			db.close();
 	  		});
 		});
 	});
 	return prom;
 }
-function update(){
-	console.log("update");
-	
-	var prom=insertOurs();
-	prom.then(function(){
-		for(var i=0;i<gruppi.length;i++){
+function update(){				//non serve
+	console.log("pre updating");
+	var prom=new Promise(function(resolve,reject){
+		MongoClient.connect(url, function(err, db) {
+	  		if (err) throw err;
+	  		var dbo = db.db("mydb");
+	  		dbo.collection("globAss").deleteMany({}, function(err, obj) {
+	    			if (err) throw err;
+	    			console.log(obj.result.n + " document(s) deleted");
+				resolve();
+	    			db.close();
+	  		});
+		});
+	});
+	return prom;
+}
+function update(i){
+	console.log("updating "+i);
+	var prom=new Promise(function(resolve,reject){
+		var prom2=insertOurs();
+		prom2.then(function(){
 			var uri="http://site"+gruppi[i]+".tw.cs.unibo.it/globpop";
 			https.get(uri, (resp) => {
   			var data = '';
@@ -48,21 +202,24 @@ function update(){
 		    		data += chunk;
 		  	});
 			
-  			// The whole response has been received. Print out the result.
-  			resp.on('end', () => {
+			// The whole response has been received. Print out the result.
+			resp.on('end', () => {
 				var obj=JSON.parse(data)
-				updateRec(0,obj.recommended);	
+				updateRec(0,obj.recommended);
+				resolve();
 				console.log(obj);
 				console.log("ended");
-  			});
-		
+			});
+
 			}).on("error", (err) => {
 		  		console.log("Error: " + err.message);
 			});
-		}
-	}).catch(function(fromResolve){
-		//insertOursRec(i+1,length,result);
+			
+		}).catch(function(fromResolve){
+			//insertOursRec(i+1,length,result);
+		});
 	});
+	return prom;
 }	
 function updateRec(i,data){
 	if(i<data.length){
@@ -90,9 +247,9 @@ function insertOurs(){
 			dbo.collection("ass").find().toArray(function(err,result){
 				if (err) throw err;
 				console.log("insertOurs:");
-				/*for(var i=0;i<result.length;i++){
-					locpop.insert_ass("glob",result[i].id,result[i].num);
-				}*/
+				//for(var i=0;i<result.length;i++){
+				//	locpop.insert_ass("glob",result[i].id,result[i].num);
+				//}
 				console.log(result);
 				insertOursRec(0,result);
 				resolve();
@@ -127,3 +284,102 @@ function save(from,to){	//salva i risultati ottenuti in una collezione pronta pe
 		});
 	});
 }
+/*save(obj){
+	MongoClient.connect(url, function(err, db) {
+		if (err) throw err;
+  		var dbo = db.db("DBstk");
+		var video = {id:max_popularity.videoID, num: max_popularity.timesWatched}
+		dbo.collection("glob").insertOne(video, function(err, res) {
+			if (err) throw err;
+			db.close();
+		});
+	}	
+}*/
+/*function compare(max_popularity){		//confronta il max popularity del team precedente con i nostri valori incrementati 
+						//con i valori degli altri gruppi
+	MongoClient.connect(url, function(err, db) {
+  		if (err) throw err;
+  		var dbo = db.db("DBstk");
+  		dbo.collection("glob").deleteMany({}, function(err, obj) {
+    			if (err) throw err;
+    			console.log(obj.result.n + " document(s) deleted");
+    			db.close();
+  		});
+	});
+	MongoClient.connect(url, function(err, db) {
+		if (err) throw err;
+  		var dbo = db.db("DBstk");
+		dbo.collection("glob").deleteMany({}, function(err, obj) {
+    			if (err) throw err;
+    			console.log(obj.result.n + " document(s) deleted");
+			var video = {id:max_popularity.videoID, num: max_popularity.timesWatched}
+			dbo.collection("glob").insertOne(video, function(err, res) {
+				if (err) throw err;
+			});
+  			dbo.collection("ass").find().toArray(function(err,result){
+				if (err) throw err;
+				console.log("i miei video:");
+				console.log(result);
+				var m_pop=max_popularity;
+				for(var i=0;i<result.length;i++){
+					tot(result[i],0,result[i].num);
+					
+				}
+				
+				
+    				db.close();
+			});
+		});
+	});
+}*/
+/*function tot(vid,i,sum){
+	if(i<gruppi.length){
+		var uri="http://site"+gruppi[i]+".tw.cs.unibo.it/globpop?id="+vid.id;
+		https.get(uri, (resp) => {
+  		var data = '';
+	
+	  	// A chunk of data has been recieved.
+	  	resp.on('data', (chunk) => {
+	    		data += chunk;
+	  	});
+	
+		  	// The whole response has been received. Print out the result.
+  		resp.on('end', () => {
+			var j = -1;
+			//console.log(data);
+			var obj=JSON.parse(data);
+			for (var k = 0; k<obj.recommended.length;k++){
+				if(obj.recommended[k].prevalentReason=="search") 
+					j=k;}
+			if(j>=0){
+				console.log("search:");
+				console.log(obj.recommended[j]);
+				tot(vid,i+1,sum+obj.recommended[j].timesWatched);
+			}else{
+				console.log("non c'e' la search!!!");
+				tot(vid,i+1,sum);
+			}
+			console.log(obj);
+			console.log(j);
+			console.log("sum:");
+			console.log(sum);
+			console.log("ended");
+	  	});
+	
+		}).on("error", (err) => {
+	  		console.log("Error: " + err.message);
+			tot(vid,i+1,sum);
+		});
+	}else{		//ha gia visitato tutti gli altri siti, sum e' la somma totale
+		MongoClient.connect(url, function(err, db) {
+			if (err) throw err;
+  			var dbo = db.db("DBstk");
+			var video = {id:vid.id, num: sum}
+			dbo.collection("glob").insertOne(video, function(err, res) {
+				if (err) throw err;
+				console.log(sum);
+				db.close();
+			});
+		});
+	}
+}*/
