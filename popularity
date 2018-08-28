@@ -1,7 +1,7 @@
 var MongoClient = require('mongodb').MongoClient;
 var url_DB = "mongodb://localhost:27017/mydb";		//db statico (con nomi di collezioni prefissati)	
 var url = "mongodb://localhost:27017/";
-var debug=true;
+var debug=false;
 var gruppi=["1828","1838"];
 var collection=["ass","rel"];
 var MAXVID=20;
@@ -20,10 +20,13 @@ var is_updating=[false,false];
 exports.gruppi=gruppi;
 exports.insert=insert;
 exports.insertLocAss=insertLocAss;
+exports.insertLocRel=insertLocRel;
 exports.updateAll=updateAll;
 exports.findAll=findAll;
 exports.findLocAss=findLocAss;
 exports.findGlobAss=findGlobAss;
+exports.findLocRel=findLocRel;
+exports.findGlobRel=findGlobRel;
 
 
 function reset(){		//resetta tutto (non so se sia effettivamente necessario usarlo)
@@ -243,49 +246,83 @@ function isUpdating(){
 
 
 function findLocAss(){
-	find(MAXVID,null,true);
-}
-function findLocRel(vid_id){
-	find(MAXVID,vid_id,true);
-}
-function findGlobAss(){
-	find(MAXVID,null,false);
-}
-function findGlobRel(vid_id){
-	find(MAXVID,vid_id,false);
-}
-function find(n,from_id,is_local){				//trova gli n video piu visualizzati
-	MongoClient.connect(url, function(err, db) {
-		if (err) throw err;
-  		var dbo = db.db("mydb");
-		var query;
-		var collection;
-		
-		if(from_id==null){
-			collection="ass";
-			if(is_local)
-				query={from:"me"};
-			else
-				query={from:"tot"}
-		
-		}else{
-			collection="rel";
-			if(is_local)
-				query={from_id:from_id,from:"me"};
-			else
-				query={from_id:from_id,from:"tot"}
-		
-		}
-		console.log(query);
-		dbo.collection(collection).find(query).sort({num:-1}).limit(n).toArray(function(err,result){
-			if (err) throw err;
-			if(debug) console.log("find_ass:");
-    			if(debug) console.log(result);
-			
-    			db.close();
+	var prom=new Promise(function(resolve,reject){
+		if(debug) console.log("in findLocAss");
+		var prom2=find(MAXVID,null,true);
+		prom2.then(function(data){
+			if(debug) console.log("in then, data:");
+			if(debug) console.log(data);
+			resolve(data);
 		});
 	});
+	return prom;
+}
+function findLocRel(vid_id){
+	var prom=new Promise(function(resolve,reject){
+		var prom2=find(MAXVID,vid_id,true);
+		prom2.then(function(data){
+			resolve(data);
+		});
+	});
+	return prom;
 	
+}
+function findGlobAss(){
+	var prom=new Promise(function(resolve,reject){
+		var prom2=find(MAXVID,null,false);
+		prom2.then(function(data){
+			resolve(data);
+		});
+	});
+	return prom;
+	
+}
+function findGlobRel(vid_id){
+	var prom=new Promise(function(resolve,reject){
+		var prom2=find(MAXVID,vid_id,false);
+		prom2.then(function(data){
+			resolve(data);
+		});
+	});
+	return prom;
+
+}
+function find(n,from_id,is_local){				//trova gli n video piu visualizzati
+	var prom=new Promise(function(resolve,reject){
+		MongoClient.connect(url, function(err, db) {
+			if (err) throw err;
+	  		var dbo = db.db("mydb");
+			var query;
+			var collection;
+		
+			if(from_id==null){
+				collection="ass";
+				if(is_local)
+					query={from:"me"};
+				else
+					query={from:"tot"}
+		
+			}else{
+				collection="rel";
+				console.log("is rel!!");
+				if(is_local)
+					query={from_id:from_id,from:"me"};
+				else
+					query={from_id:from_id,from:"tot"}
+		
+			}
+			if(debug) console.log(query);
+			dbo.collection(collection).find(query).sort({num:-1}).limit(n).toArray(function(err,result){
+				if (err) throw err;
+				if(debug) console.log("find:");
+	    			if(debug) console.log(result);
+				resolve(result);
+				if(debug) console.log("find finished!");
+	    			db.close();
+			});
+		});
+	});
+	return prom;
 }
 function findAll(collection){				//trova gli n video piu visualizzati
 	console.log("pippo");
