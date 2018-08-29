@@ -9,18 +9,59 @@ console.log("ho chiamato lo script");
 
       // 3. This function creates an <iframe> (and YouTube player)
       //    after the API code downloads.
+      var recommender_size=20;    //dimensione tabella degli ultimi video visitati
       var currentVideo="8of3uhG1tCI";
+      var lastVideo=null;	//video precedente a quello attualmente visto
 
       //timer per controllare i secondi di video passati prima di salvarlo
       var clock;
       var timerOn;
       var time;
 
+
+      function savePopularity(){
+        $.get("http://localhost:8000/popularity?from_id="+currentVideo, function(data, status){
+      	  
+        });
+	var vid_recent=[recommender_size];
+	var size=caricarecent(vid_recent);
+	var flag=false;
+	if(lastVideo!=currentVideo)
+  	  for(var i=0;i<size;i++){
+	    if(lastVideo==vid_recent[i]){
+	      $.get("http://localhost:8000/popularity?from_id="+lastVideo+"&to_id="+currentVideo, function(data, status){
+	        //alert("last video: " + lastVideo + "\this video: " + currentVideo);
+	      });
+	    }
+	  }
+      }
+      function caricaPopularity(reason,out){
+	var prom=new Promise(function(resolve,reject){
+		$.get("http://localhost:8000/popularity?from_id="+currentVideo+"&reason="+reason, function(data, status){
+	  		var v=JSON.parse(data);
+			console.log(data);
+			//for(var i = 0;i<v.length;i++)
+			//	out[i]=v[i].id;
+			if((reason=="popLocAss")||(reason=="popGlobAss")){
+				for(var i = 0;i<v.length;i++)
+					out[i]=v[i].id;
+			}else{
+				for(var i = 0;i<v.length;i++)
+					out[i]=v[i].to_id;
+			}
+	  		resolve(v.length);
+		});
+	});
+	return prom;
+      }
       function timedCount(){
         time=time+1;
-        if(time==10)
+        if(time==10){	//se il viddeo e' stato visto
           salvarecent(currentVideo);
-        if(time<10)
+	  savePopularity();
+	  
+        }
+	if(time<10)
           clock=setTimeout(timedCount, 1000);
       }
 
@@ -129,12 +170,12 @@ console.log("ho chiamato lo script");
 
         function caricavideo(data){
             newClock();
+	    lastVideo=currentVideo
             currentVideo=data;
             player.loadVideoById(data, 0, "large");  //"0" secondi di inizio del video
           
         }
 
-        var recommender_size=20;    //dimensione tabella degli ultimi video visitati
         function salvarecent(ID){
           var vid=[recommender_size];
           var dim=caricarecent(vid);
@@ -189,7 +230,7 @@ console.log("ho chiamato lo script");
         //category="#"+category;
         
         var html="";
-          for (var i = 0; i < dim-1; i++) {
+          for (var i = 0; i < dim; i++) {
             if(info){
                 html += "<div  class='card border-info mb-3' style='width: 16rem;display: inline-block;'>";
                 html+=" <img class='card-img-top'  src ='https://img.youtube.com/vi/"+vid[i].id.videoId+"/default.jpg' value='"+vid[i].id.videoId+"' alt='Card image cap'>";
@@ -266,7 +307,19 @@ console.log("ho chiamato lo script");
               console.log(vid);
                    
               }
-                
+            if((category=="popLocAss")||(category=="popLocRel")||(category=="popGlobAss")||(category=="popGlobRel")){
+              info=false
+	      var prom=caricaPopularity(category,vid);
+              prom.then(function(d){
+		dim=d;
+                var j=0;
+                takeInfoById(j);
+		console.log("vid: "+vid+" dim: "+dim);
+                console.log(vid);
+	      });
+
+                   
+            }
             
             if (category=="search") {
               //controllo se sto cercando per id, se vero lancio direttamente il video legato all' id
@@ -331,7 +384,7 @@ console.log("ho chiamato lo script");
             }
 
 
-          
+          if((category!="popLocAss")&&(category!="popLocRel")&&(category!="popGlobAss")&&(category!="popGlobRel"))
               stampa(vid,dim,category,info);
       
         }
