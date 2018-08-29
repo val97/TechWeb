@@ -1,5 +1,5 @@
 var MongoClient = require('mongodb').MongoClient;
-var locpop = require ('./popularity0.4.js');
+var locpop = require ('./popularity.js');
 var https = require('http');
 var url = "mongodb://localhost:27017/";
 var gruppi=locpop.gruppi;
