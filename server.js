@@ -1,6 +1,6 @@
 var fs = require("fs");
 var http = require("http");
-var locpop = require ('./popularity0.4.js');
+var locpop = require ('./popularity.js');
 var url = require("url");			//permette di caricare anche gli script del file html
 
 http.createServer(function (request, response) {
