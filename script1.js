@@ -39,14 +39,13 @@ console.log("ho chiamato lo script");
 	var prom=new Promise(function(resolve,reject){
 		$.get("http://localhost:8000/popularity?from_id="+currentVideo+"&reason="+reason, function(data, status){
 	  		var v=JSON.parse(data);
-			console.log(data);
 			//for(var i = 0;i<v.length;i++)
 			//	out[i]=v[i].id;
 			if((reason=="popLocAss")||(reason=="popGlobAss")){
-				for(var i = 0;i<v.length;i++)
+				for(var i = 0;i<v.length&&i<recommender_size;i++)
 					out[i]=v[i].id;
 			}else{
-				for(var i = 0;i<v.length;i++)
+				for(var i = 0;i<v.length&&i<recommender_size;i++)
 					out[i]=v[i].to_id;
 			}
 	  		resolve(v.length);
@@ -228,7 +227,6 @@ console.log("ho chiamato lo script");
         //riempie i recommender
        function stampa(vid, dim,category,info){
         //category="#"+category;
-        
         var html="";
           for (var i = 0; i < dim; i++) {
             if(info){
@@ -291,7 +289,7 @@ console.log("ho chiamato lo script");
                              // console.log(vid[j].id);
                               if(j<20)
                                 takeInfoById(j);
-                              if(j==19)
+                              if(j==20)
                                 stampa(vid,dim,category,info);
                            }
                         });
@@ -314,8 +312,6 @@ console.log("ho chiamato lo script");
 		dim=d;
                 var j=0;
                 takeInfoById(j);
-		console.log("vid: "+vid+" dim: "+dim);
-                console.log(vid);
 	      });
 
                    
