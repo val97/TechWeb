@@ -1,7 +1,7 @@
 var MongoClient = require('mongodb').MongoClient;
 var url_DB = "mongodb://localhost:27017/mydb";		//db statico (con nomi di collezioni prefissati)	
 var url = "mongodb://localhost:27017/";
-var debug=false;
+var debug=true;
 var gruppi=["1828","1838"];
 var collection=["ass","rel"];
 var MAXVID=20;
@@ -9,7 +9,7 @@ var is_updating=[false,false];
 
 //reset();
 
-//insertLocAss("LocID1");
+//insertLocAss("CC5ca6Hsb2Q");
 //insertLocRel("locDaID","locDaID");
 //insertGlobAss("globID1",5,0);		//id,num visualizzazioni,gruppo i-esimo
 //insertGlobRel("globID","globID",6,1);	//analogo
@@ -40,13 +40,13 @@ function reset(){		//resetta tutto (non so se sia effettivamente necessario usar
 	resetRec(0);
 };
 function resetRec(i){
-	if(i<collection.length+gruppi.length){
+	if(i<collection.length){		//+gruppi.length
 		var targhet;
 		if(i<collection.length)
 			targhet=collection[i];
-		else
+		/*else
 			targhet=gruppi[i-collection.length];
-		
+		*/
 		MongoClient.connect(url, function(err, db) {
 			if (err) throw err;
 			var dbo = db.db("mydb");
@@ -69,22 +69,22 @@ function resetRec(i){
 
 //inserisce vid_id come video visto localmente
 function insertLocAss(vid_id){
-	insert(vid_id,null,1,-1);
+	insert(vid_id,null,1,-1,null);
 }
 //inserisce from_id come video visto localmente, dopo aver visualizzato to_id
 function insertLocRel(from_id,to_id){
-	insert(from_id,to_id,1,-1);
+	insert(from_id,to_id,1,-1,null);
 }
 //inserisce vid_id come video visto n volte, dal gruppo i-esimo
-function insertGlobAss(vid_id,n,i){
-	insert(vid_id,null,n,i);
+function insertGlobAss(vid_id,n,i,date){
+	insert(vid_id,null,n,i,date);
 }
 //inserisce to_id come video visto n volte dopo aver visualizzato from_id, secondo il gruppo i-esimo
-function insertGlobRel(from_id,to_id,n,i){
-	insert(from_id,to_id,n,i);
+function insertGlobRel(from_id,to_id,n,i,date){
+	insert(from_id,to_id,n,i,date);
 }
 //generalizza gli altri insert (viene infatti usato da essi)
-function insert(from_id,to_id,n,i){	
+function insert(from_id,to_id,n,i,date){	
 //from_id/to_id: da quale video(from_id) viene visualizzato quale video(to_id) 		
 //n:che valore ci metto
 //i:quale gruppo sta salvando le visualizzazioni	-1 se e' locale
@@ -103,14 +103,16 @@ function insert(from_id,to_id,n,i){
 				collection="rel";
 			}
 			if(i==-1){
-				dbo.collection(collection).update(query, {$inc:{num:n}},{ upsert: true }, function(err, res) {
+				var d=new Date();
+				dbo.collection(collection).update(query, {$inc:{num:n},$set:{last_watched:d}},{ upsert: true }, function(err, res) {
 					if (err) throw err;
+					
 					resolve();
 					db.close();
 				});
 			}else{
 				query.from=gruppi[i];
-				dbo.collection(collection).update(query,{$set:{num:n}},{ upsert: true }, function(err, res) {
+				dbo.collection(collection).update(query,{$set:{num:n},$max:{last_watched:date}},{ upsert: true }, function(err, res) {
 					if (err) throw err;
 					resolve();
 					db.close();
@@ -123,6 +125,7 @@ function insert(from_id,to_id,n,i){
 	});
 	return prom;
 }
+
 /*function updateTotAss(){
 	console.log("pippo");
 	MongoClient.connect(url, function(err, db) {
@@ -183,18 +186,22 @@ function updateTotRec(data,i,is_ass){
 				if (err) throw err;
 				//console.log(result);
 				var tot=0;
+				var lastWatched=new Date(result[0].last_watched);
 				console.log(result);
 				for(var j=0;j<result.length;j++){
+					var d=new Date(result[j].last_watched);
 					if(result[j].from!="tot"){
 						tot=tot+result[j].num;
+						if(d>=lastWatched){
+							lastWatched=d;
+						}
 					}
 				}
-				//console.log(tot);
 				if(is_ass)
 					query={id:data[i].id,from:"tot"};
 				else
 					query={from_id:data[i].from_id,to_id:data[i].to_id,from:"tot"};
-				dbo.collection(collection).update(query,{$set:{num:tot}},{ upsert: true }, function(err, res) {
+				dbo.collection(collection).update(query,{$set:{num:tot,last_watched:lastWatched}},{ upsert: true }, function(err, res) {
 					if (err) throw err;
 					//console.log(tot)
 					updateTotRec(data,i+1,is_ass);
