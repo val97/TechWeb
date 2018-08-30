@@ -18,6 +18,7 @@ var is_updating=[false,false];
 //findAll("ass");
 //updateAll();
 exports.gruppi=gruppi;
+exports.reset=reset;
 exports.insert=insert;
 exports.insertLocAss=insertLocAss;
 exports.insertLocRel=insertLocRel;
