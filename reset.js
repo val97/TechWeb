@@ -1,2 +1,2 @@
-var locpop = require('/popularity.js');
+var locpop = require('./popularity.js');
 locpop.reset();
