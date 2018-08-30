@@ -1,7 +1,7 @@
 var MongoClient = require('mongodb').MongoClient;
 var url_DB = "mongodb://localhost:27017/mydb";		//db statico (con nomi di collezioni prefissati)	
 var url = "mongodb://localhost:27017/";
-var debug=true;
+var debug=false;
 var gruppi=["1828","1838"];
 var collection=["ass","rel"];
 var MAXVID=20;
