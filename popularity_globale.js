@@ -1,5 +1,5 @@
 var MongoClient = require('mongodb').MongoClient;
-var locpop = require ('./popularity.js');
+var locpop = require ('./popularity0.4.js');
 var https = require('http');
 var url = "mongodb://localhost:27017/";
 var gruppi=locpop.gruppi;
@@ -80,18 +80,19 @@ function updateGruppiAss(i,j,data){
 				if(data[i].videoID!=null)
 					id=data[i].videoID;
 			var num=data[i].timesWatched;
+			var lastWatched=0;
+			if(data[i].lastSelected!=null)
+				lastWatched=data[i].lastSelected;
+			
 			if(id!=""){
-				//locpop.insert(id,null,num,j);	
-				var prom1=locpop.insert(id,null,num,j);		
+				var prom1=locpop.insert(id,null,num,j,lastWatched);
 				prom1.then(function(){
-					//updateGruppiAss(i+1,j,data);
 					var prom2=updateGruppiAss(i+1,j,data);
 					prom2.then(function(){
 						resolve();
 					});
 				});
 			}else{
-				//updateGruppiAss(i+1,j,data);
 				var prom2=updateGruppiAss(i+1,j,data);
 				prom2.then(function(){
 					resolve();
