@@ -23,46 +23,47 @@ console.log("ho chiamato lo script");
         $.get("http://localhost:8000/popularity?from_id="+currentVideo, function(data, status){
       	  
         });
-	var vid_recent=[recommender_size];
-	var size=caricarecent(vid_recent);
-	var flag=false;
-	if(lastVideo!=currentVideo)
-  	  for(var i=0;i<size;i++){
-	    if(lastVideo==vid_recent[i]){
-	      $.get("http://localhost:8000/popularity?from_id="+lastVideo+"&to_id="+currentVideo, function(data, status){
-	        //alert("last video: " + lastVideo + "\this video: " + currentVideo);
-	      });
-	    }
-	  }
+      	var vid_recent=[recommender_size];
+      	var size=caricarecent(vid_recent);
+      	var flag=false;
+      	if(lastVideo!=currentVideo)
+        	  for(var i=0;i<size;i++){
+      	      if(lastVideo==vid_recent[i]){
+          	      $.get("http://localhost:8000/popularity?from_id="+lastVideo+"&to_id="+currentVideo, function(data, status){
+          	        //alert("last video: " + lastVideo + "\this video: " + currentVideo);
+          	      });
+      	      }
+	          }
       }
       function caricaPopularity(reason,out){
-	var prom=new Promise(function(resolve,reject){
-		$.get("http://localhost:8000/popularity?from_id="+currentVideo+"&reason="+reason, function(data, status){
-	  		var v=JSON.parse(data);
-			//for(var i = 0;i<v.length;i++)
-			//	out[i]=v[i].id;
-			if((reason=="popLocAss")||(reason=="popGlobAss")){
-				for(var i = 0;i<v.length&&i<recommender_size;i++)
-					out[i]=v[i].id;
-			}else{
-				for(var i = 0;i<v.length&&i<recommender_size;i++)
-					out[i]=v[i].to_id;
-			}
-	  		resolve(v.length);
-		});
-	});
-	return prom;
+      	var prom=new Promise(function(resolve,reject){
+      		$.get("http://localhost:8000/popularity?from_id="+currentVideo+"&reason="+reason, function(data, status){
+      	  		var v=JSON.parse(data);
+      			console.log(data);
+      			//for(var i = 0;i<v.length;i++)
+      			//	out[i]=v[i].id;
+      			if((reason=="popLocAss")||(reason=="popGlobAss")){
+      				for(var i = 0;i<v.length;i++)
+      					out[i]=v[i].id;
+      			}else{
+      				for(var i = 0;i<v.length;i++)
+      					out[i]=v[i].to_id;
+      			}
+      	  		resolve(v.length);
+      		});
+      	});
+      	return prom;
       }
       function timedCount(){
         time=time+1;
         if(time==10){	//se il viddeo e' stato visto
           salvarecent(currentVideo);
-	  savePopularity();
+	      savePopularity();
 	  
         }
-	if(time<10)
+	      if(time<10)
           clock=setTimeout(timedCount, 1000);
-      }
+       }
 
       function startClock(){
         if(!timerOn){
@@ -100,12 +101,85 @@ console.log("ho chiamato lo script");
         event.target.playVideo();
       }
 
+
+      //prende titolo e nome dell'artista
+         function getDbpediaInfo(){
+          var currVid;
+          var artist="";
+          var title="";
+          
+
+
+           $.ajax({
+                           url: 'https://www.googleapis.com/youtube/v3/videos?key=' + 'AIzaSyCmxhjyAdTBxuEOG_etapCgLYwIBpSmdbQ' + '&id=' + currentVideo + '&part=snippet',
+                           success: function(data){ currVid=data.items[0];},
+
+                           complete: function(){
+
+                              console.log(currVid);
+                               title=currVid.snippet.title;
+                            
+                              title=title.split("-");
+                              console.log(title);
+                              if(title.length==1){
+                                console.log("sono dentro");
+                               
+                                title=title[0].split("|");
+                              //  title=title.replace("","_");
+
+                              }if(title.length>1){
+                              
+                                
+                                artist=title[0];
+                                artist=artist.trim();
+                                
+                              //  artist=artist.replace(/ /g,"_");
+                                console.log("artist");
+                                console.log(artist);
+                               // title=title[1].split('(');
+                                title[0]=title[0].trim();
+                                var titolo=title[1]
+                                titolo=titolo.split("(");
+                                console.log("titolo"+titolo);
+                                //title=title[0].replace(" ","_");
+
+                                // $('#wiki_container').html("ciao");
+                                $.get("http://localhost:8000/info?artist="+artist+"&title="+titolo[0].trim(), function(data, status){
+                                   console.log("canzone");
+
+                                   console.log(data);
+                                   var wiki="";
+                                   wiki=data.results.bindings[0].Sabstract;
+                                   console.log(wiki);
+                                    $('#wiki_container').html(wiki.value);
+                                   
+                                });
+                             // console.log(title);
+                              //console.log(artist);
+                            }
+                            //queryForDb(title+"_("+artist+"_song)",title,artist);
+
+                         }
+
+           });
+
+            /*console.log(title);
+            console.log("title");
+            console.log(artist);*/
+           
+
+           //fai una richiesta al server con una GET
+           
+
+
+         }
+
      
      var done = false;
       function onPlayerStateChange(event) {
        if(event.data == YT.PlayerState.PLAYING){
           startClock();
-
+          getDbpediaInfo();
 //            e.preventDefault();
           var q = currentVideo;
           var request = gapi.client.request({
@@ -203,7 +277,7 @@ console.log("ho chiamato lo script");
           if (video==null)
             return i;   //dimensione di out
 
-            console.log("caricarecent"+video);
+            //console.log("caricarecent"+video);
           out[i]= video;     //returna null se l'eselmento non esiste
           }
           return recommender_size;
@@ -227,6 +301,7 @@ console.log("ho chiamato lo script");
         //riempie i recommender
        function stampa(vid, dim,category,info){
         //category="#"+category;
+        
         var html="";
           for (var i = 0; i < dim; i++) {
             if(info){
@@ -312,6 +387,8 @@ console.log("ho chiamato lo script");
 		dim=d;
                 var j=0;
                 takeInfoById(j);
+		console.log("vid: "+vid+" dim: "+dim);
+                console.log(vid);
 	      });
 
                    
