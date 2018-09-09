@@ -23,9 +23,7 @@ app.get('/script1.js',(req,res)=>{
 });
 
 app.get('/popularity',(req,res)=>{
-	//var q = url.parse(request.url, true).query;
 	var from_id = req.query.from_id;
-	console.log("from id: "+from_id);
 	var to_id = req.query.to_id;
 	var reason=req.query.reason;
 	if(reason!=null){
@@ -35,7 +33,6 @@ app.get('/popularity',(req,res)=>{
 			prom=locpop.findLocAss();
 		}
 		if(reason=="popLocRel"){
-			console.log("loc rel!!!");
 			prom=locpop.findLocRel(from_id);
 		}
 		if(reason=="popGlobAss"){
@@ -51,10 +48,8 @@ app.get('/popularity',(req,res)=>{
 		if(from_id != null){
 			if(to_id == null){
 				locpop.insertLocAss(from_id);
-			//	console.log("inserito: "+from_id);
 			}else{
 				locpop.insertLocRel(from_id,to_id);
-				//console.log("inserito: "+to_id+" dopo "+from_id);
 			}
 		}
 		res.end();
@@ -66,45 +61,46 @@ app.get('/info', (req,res)=>{
 		var artista= req.query.artist;
 		var title=req.query.title;
 		var Release = mb.Release;
-		console.log("title");
-		console.log(title);
-		console.log(artista);
-		//var song="";
-		/*mb.searchRecordings(title, { artist: artista }, function(err, recordings){
-    		console.log("recordings");
-    		console.log(recordings[1]);
-    		if(recordings[1])*/
 
     			//PER IL MOMENTO CERCA SOLTANTO PER ARTISTA, FRA POCO FACCIO IN MODO CHE CERCHI ANCHE PER BAND E MUSICALARTIST
     			//HO PRESO I RISULTATI solo IN INGLESE, 
     			var url = "http://dbpedia.org/sparql";
               
-				var query= "PREFIX dbo: <http://dbpedia.org/ontology/>"+
-						   "SELECT * WHERE {"+
+				var query=  "PREFIX dbo: <http://dbpedia.org/ontology/>"+
+							"PREFIX foaf:<http://xmlns.com/foaf/0.1/>"+
+							"SELECT distinct * WHERE {"+
 
-							"?artist a <http://dbpedia.org/ontology/MusicalArtist>."+
-							"?artist <http://xmlns.com/foaf/0.1/name> ?artName."+
+							"?artist foaf:name ?artName."+
 							"?artist dbo:abstract ?abstract ."+
+							"OPTIONAL { ?artist a dbo:MusicalArtist.}"+ 
+							"OPTIONAL { ?artist a dbo:Band. } "+
 
-							"?song <http://dbpedia.org/ontology/artist> ?artist."+
-							"?song dbo:abstract ?Sabstract ."+
-							"?song <http://xmlns.com/foaf/0.1/name> ?songName."+
+							"?song   dbo:abstract ?Sabstract ."+
+							"?song   foaf:name ?songName."+
+							"OPTIONAL { ?song dbo:musicalArtist ?artist } ."+
+							"OPTIONAL { ?song dbo:artist ?artist } ."+
 
-							"filter regex(?artName, '"+artista+"','i')"+
-							"FILTER ( langMatches(lang(?abstract), 'en'))"+
-							"FILTER ( langMatches(lang(?Sabstract), 'en'))"+
-							"filter regex(?songName, '"+title+"', 'i')"+
+							"filter  regex(?artName, '"+artista+"', 'i')"+
+							"FILTER  ( langMatches(lang(?abstract), 'en'))"+
+							"FILTER  ( langMatches(lang(?Sabstract), 'en'))"+
+
+
+							"filter  regex(?songName, '"+title+"', 'i')"+
 							"}";
+
+
+
+
 							var queryUrl = encodeURI( url+"?query="+query );
-							console.log(queryUrl);
+							//console.log(queryUrl);
 
 
 
 request.get(queryUrl, { json: true }, (err, res1, body) => {
- // if (err) { return console.log(err); }
+  if (err) { return console.log(err); }
   //console.log(res1.statusCode);
   if(res1.statusCode){
-  	console.log(body.results.bindings);
+  	console.log(res1.statusCode);
   	res.json(body);
   }
 });
