@@ -66,32 +66,35 @@ app.get('/info', (req,res)=>{
     			//HO PRESO I RISULTATI solo IN INGLESE, 
     			var url = "http://dbpedia.org/sparql";
               
-				var query=  "PREFIX dbo: <http://dbpedia.org/ontology/>"+
-							"PREFIX foaf:<http://xmlns.com/foaf/0.1/>"+
-							"SELECT distinct * WHERE {"+
+				
+				var query=`PREFIX dbo: <http://dbpedia.org/ontology/>
+							PREFIX foaf:<http://xmlns.com/foaf/0.1/>
+							SELECT distinct * WHERE {
+							{
+							    ?artist a dbo:MusicalArtist.
+							    ?artist foaf:name ?artName.
+							    ?artist dbo:abstract ?abstract .
+							}UNION{
+							    ?artist a dbo:Band.
+							    ?artist foaf:name ?artName.
+							    ?artist dbo:abstract ?abstract  
+							}.
+							{
+							    ?song dbo:musicalArtist ?artist.
+							    ?song   dbo:abstract ?Sabstract .
+							    ?song   foaf:name ?songName.
+							}UNION{
+							    ?song dbo:artist ?artist.
+							    ?song   dbo:abstract ?Sabstract .
+							    ?song   foaf:name ?songName.
+							} .
+							filter  regex(?artName, '`+artista+`', 'i')
+							FILTER  ( langMatches(lang(?abstract), 'en'))
+							FILTER  ( langMatches(lang(?Sabstract), 'en'))
+							filter  regex(?songName, '`+title+`', 'i')
+							}`;
 
-							"?artist foaf:name ?artName."+
-							"?artist dbo:abstract ?abstract ."+
-							"OPTIONAL { ?artist a dbo:MusicalArtist.}"+ 
-							"OPTIONAL { ?artist a dbo:Band. } "+
-
-							"?song   dbo:abstract ?Sabstract ."+
-							"?song   foaf:name ?songName."+
-							"OPTIONAL { ?song dbo:musicalArtist ?artist } ."+
-							"OPTIONAL { ?song dbo:artist ?artist } ."+
-
-							"filter  regex(?artName, '"+artista+"', 'i')"+
-							"FILTER  ( langMatches(lang(?abstract), 'en'))"+
-							"FILTER  ( langMatches(lang(?Sabstract), 'en'))"+
-
-
-							"filter  regex(?songName, '"+title+"', 'i')"+
-							"}";
-
-
-
-
-							var queryUrl = encodeURI( url+"?query="+query );
+				var queryUrl = encodeURI( url+"?query="+query );
 							//console.log(queryUrl);
 
 
@@ -99,7 +102,7 @@ app.get('/info', (req,res)=>{
 request.get(queryUrl, { json: true }, (err, res1, body) => {
   if (err) { return console.log(err); }
   //console.log(res1.statusCode);
-  if(res1.statusCode){
+ if(res1.statusCode){
   	console.log(res1.statusCode);
   	res.json(body);
   }

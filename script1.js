@@ -102,8 +102,6 @@
           var currVid;
           var artist="";
           var title="";
-          
-
 
            $.ajax({
                            url: 'https://www.googleapis.com/youtube/v3/videos?key=' + 'AIzaSyCmxhjyAdTBxuEOG_etapCgLYwIBpSmdbQ' + '&id=' + currentVideo + '&part=snippet',
