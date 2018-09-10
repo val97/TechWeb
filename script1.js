@@ -133,13 +133,9 @@
                                 $.get("http://localhost:8000/info?artist="+artist+"&title="+titolo[0].trim(), function(data, status){
 
                                    var wiki="";
-			           var artistInfo="";
                                    wiki=data.results.bindings[0].Sabstract;
-				   artistInfo=data.results.bindings[0].abstract; //se si vogliono aggiungere le info del cantant
-                                    if(data.results.bindings[0].Sabstract){
+                                    if(data.results.bindings[0].Sabstract)
                                       $('#wiki_container').html(wiki.value);
-				      $('#artist_container').html(artistInfo.value);
-				    }
                                     else
                                       $('#wiki_container').html("no abs founded\n");
                                 });
@@ -198,17 +194,9 @@
 
       //viene riempita la lista delle canzoni iniziali
       function loadCatalog(data){
-          var main="";
           for (var i = 0; i < data.length; i++) {
-            // $("#main").append("<button data-dismiss='modal' onclick='caricavideo("+JSON.stringify(data[i].videoID)+")'>"+data[i].category+ data[i].artist+data[i].title+data[i].videoID+"</button>");
-
-
-             main += "<div  class='card border-info mb-3' style='width: 16rem;height: 20rem; display: inline-block;'>";
-            main +=" <img class='card-img-top'  src ='https://img.youtube.com/vi/"+(JSON.stringify(data[i].videoID)).slice(1,-1)+"/default.jpg' value='"+JSON.stringify(data[i].videoID)+"' alt='Card image cap'>";
-             main += "<div class='card-body'> <p class='card-text'><b>"+ data[i].title +"</b><br>"+data[i].category+"<br>"+ data[i].artist+"</p></div></div> ";
-
+             $("#main").append("<button data-dismiss='modal' onclick='caricavideo("+JSON.stringify(data[i].videoID)+")'>"+data[i].category+ data[i].artist+data[i].title+data[i].videoID+"</button>");
           }
-           $(".container-fluid").html(main);
         }
 
         function caricavideo(data){
@@ -217,6 +205,14 @@
             currentVideo=data;
             player.loadVideoById(data, 0, "large");  //"0" secondi di inizio del video
             current_reason=last_reason;
+            var stateObj = {id:data};
+            history.pushState(stateObj , data, "?id="+data);
+        }
+	function historyBack(id){
+            newClock();
+	    lastVideo=null;
+            currentVideo=id;
+            player.loadVideoById(id, 0, "large");  //"0" secondi di inizio del video
         }
 
         function salvarecent(ID){
@@ -413,7 +409,10 @@
             text = possible.charAt(Math.floor(Math.random() * possible.length));
             return text;
         }
-
+        function initHistory() {
+          var stateObj = { id: currentVideo };
+          history.replaceState(stateObj , currentVideo, "?id="+currentVideo);
+        }
         
 
         
@@ -421,6 +420,11 @@
         // inserita search luci
 
         $(document).ready(function(){   
+          initHistory();
+          $(window).on('popstate', function() {
+            var id = history.state.id;
+            historyBack(id);
+          });
           $("#search-button").click(function(e){
             e.preventDefault();
             var q = $('#query').val();
