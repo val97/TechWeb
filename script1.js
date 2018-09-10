@@ -133,9 +133,12 @@
                                 $.get("http://localhost:8000/info?artist="+artist+"&title="+titolo[0].trim(), function(data, status){
 
                                    var wiki="";
+			           var artistInfo="";
                                    wiki=data.results.bindings[0].Sabstract;
+				   artistInfo=data.results.bindings[0].abstract; //se si vogliono aggiungere le info del cantant
                                     if(data.results.bindings[0].Sabstract)
                                       $('#wiki_container').html(wiki.value);
+				      $('#artist_container').html(artistInfo.value);
                                     else
                                       $('#wiki_container').html("no abs founded\n");
                                 });
