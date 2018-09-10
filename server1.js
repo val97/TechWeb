@@ -1,6 +1,6 @@
 var fs = require("fs");
 var http = require("http");
-var locpop = require ('./popularity');
+var locpop = require ('./popularity0.5.js');
 var url = require("url");			//permette di caricare anche gli script del file html
 var mb = require('musicbrainz');
 const request = require('request');
@@ -12,7 +12,7 @@ const express=require('express');
 const app=express();
 
 app.get('/',(req,res)=>{
-		html = fs.readFileSync("progetto.html", "utf8");
+		html = fs.readFileSync("alpha.html", "utf8");				//prima era progetto!!!
         res.send(html);
 });
 
@@ -26,30 +26,31 @@ app.get('/popularity',(req,res)=>{
 	var from_id = req.query.from_id;
 	var to_id = req.query.to_id;
 	var reason=req.query.reason;
-	if(reason!=null){
-	
+	var ask=req.query.ask;
+	//console.log("from_id: "+from_id+" to_id: "+to_id+" reason: "+reason+" ask: "+ask);
+	if(ask!=null){
 		var prom;
-		if(reason=="popLocAss"){
+		if(ask=="popLocAss"){
 			prom=locpop.findLocAss();
 		}
-		if(reason=="popLocRel"){
+		if(ask=="popLocRel"){
 			prom=locpop.findLocRel(from_id);
 		}
-		if(reason=="popGlobAss"){
+		if(ask=="popGlobAss"){
 			prom=locpop.findGlobAss();
 		}
-		if(reason=="popGlobRel"){
+		if(ask=="popGlobRel"){
 			prom=locpop.findGlobRel(from_id);
 		}
 		prom.then(function(data){
 			res.end(JSON.stringify(data));
 		});
 	}else{
-		if(from_id != null){
-			if(to_id == null){
-				locpop.insertLocAss(from_id);
+		if(to_id != null){
+			if(from_id == null){
+				locpop.insertLocAss(to_id,reason);
 			}else{
-				locpop.insertLocRel(from_id,to_id);
+				locpop.insertLocRel(from_id,to_id,reason);
 			}
 		}
 		res.end();
@@ -113,4 +114,3 @@ request.get(queryUrl, { json: true }, (err, res1, body) => {
 	});
 	//});
     app.listen(8000, ()=>console.log("Listening on 8000"));
-
