@@ -11,6 +11,7 @@
       var lastVideo=null;	//video precedente a quello attualmente visto
       var last_reason=null;
       var current_reason=null;
+      var last_category="Recent";
       //timer per controllare i secondi di video passati prima di salvarlo
       var clock;
       var timerOn=0;
@@ -205,6 +206,7 @@
             currentVideo=data;
             player.loadVideoById(data, 0, "large");  //"0" secondi di inizio del video
             current_reason=last_reason;
+            caricaTab(last_category);
             var stateObj = {id:data};
             history.pushState(stateObj , data, "?id="+data);
         }
@@ -292,6 +294,7 @@
         var resRel="";
 
         function caricaTab(category) {
+            last_category=category;
             saveReason(category);
 
             var i, tabcontent, tablinks;
