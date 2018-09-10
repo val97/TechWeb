@@ -139,6 +139,13 @@
                                     else
                                       $('#wiki_container').html("no abs founded\n");
                                 });
+				       $.get("http://localhost:8000/info?artist="+artist+"&title="+titolo[0].trim(), function(data, status){
+                                  console.log("risposta: ");
+                                   var wiki="";
+                                   wiki=data.results.bindings[0];
+                                   console.log(wiki);
+                                });
+
                             }
                          }
            });
