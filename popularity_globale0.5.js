@@ -3,7 +3,7 @@ var locpop = require ('./popularity0.5.js');
 var https = require('http');
 var url = "mongodb://localhost:27017/";
 var gruppi=locpop.gruppi;
-var debug=true;
+var debug=false;
 var reasons=locpop.reasons;		
 
 //locpop.reset();
@@ -20,17 +20,25 @@ var reasons=locpop.reasons;
 keepUpdatingAss();
 
 function keepUpdatingAss(){
-	if(debug) console.log("in keepUpdatingAss()");
-	var prom= updateGruppi(null,0);
-	prom.then(function(){
-		var prom1= updateRel();
-		prom1.then(function(){
-			locpop.updateAll();
-			if(debug) console.log("nuovo ciclo!");
-			//dovrei metterci anche updateRel() qui
+	if(locpop.isUpdating()){
+		setTimeout(function() {
+			if(debug) console.log("!!! is updating !!!");
 			keepUpdatingAss();
+		}, 1000);
+	}else{
+		if(debug) console.log("!!! is NOT updating !!!");
+		if(debug) console.log("in keepUpdatingAss()");
+		locpop.updateAll();
+		var prom= updateGruppi(null,0);
+		prom.then(function(){
+			var prom1= updateRel();
+			prom1.then(function(){
+				if(debug) console.log("nuovo ciclo!");
+				//dovrei metterci anche updateRel() qui
+				keepUpdatingAss();
+			});
 		});
-	});
+	}
 }
 
 function updateRel(){
@@ -74,7 +82,7 @@ function updateGruppi(from_id,i){
 			if(from_id==null)
 				uri="http://site"+gruppi[i]+".tw.cs.unibo.it/globpop";
 			else
-				uri="http://site"+gruppi[i]+".tw.cs.unibo.it/globpop?id=from_id";
+				uri="http://site"+gruppi[i]+".tw.cs.unibo.it/globpop?id="+from_id;
 			https.get(uri, (resp) => {
 		  		var data = '';
 					  	// A chunk of data has been recieved.
@@ -84,22 +92,30 @@ function updateGruppi(from_id,i){
 		
 				// The whole response has been received. Print out the result.
 				resp.on('end', () => {
-					var obj=JSON.parse(data);
-					//updateGruppiAss(0,i,obj.recommended);
-					var prom1=insertData(from_id,0,i,obj.recommended);
-					prom1.then(function(){
-						prom2=updateGruppi(from_id,i+1);
-						prom2.then(function(){
-							resolve();
+					try {
+						var obj=JSON.parse(data);
+						//updateGruppiAss(0,i,obj.recommended);
+						var prom1=insertData(from_id,0,i,obj.recommended);
+						prom1.then(function(){
+							prom2=updateGruppi(from_id,i+1);
+							prom2.then(function(){
+								resolve();
+							});
 						});
-					});
-					//console.log(obj.recommended);
-					if(debug) console.log("ended");
+						//console.log(obj.recommended);
+						if(debug) console.log("ended");
+					}catch(err) {
+						if(debug) console.log("errore collegamento ad api "+gruppi[i]+ ": "+err);
+						updateGruppi(from_id,i+1);
+						resolve();
+						
+					}
 				});
 		
 			}).on("error", (err) => {
-				updateAss(i+1);
+				updateGruppi(from_id,i+1);
 				console.log("Error: " + err.message);
+				resolve();
 			});
 		}else{
 			if(debug) console.log("updateGruppi finished!");
