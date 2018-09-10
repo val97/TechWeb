@@ -194,9 +194,17 @@
 
       //viene riempita la lista delle canzoni iniziali
       function loadCatalog(data){
+          var main="";
           for (var i = 0; i < data.length; i++) {
-             $("#main").append("<button data-dismiss='modal' onclick='caricavideo("+JSON.stringify(data[i].videoID)+")'>"+data[i].category+ data[i].artist+data[i].title+data[i].videoID+"</button>");
+            // $("#main").append("<button data-dismiss='modal' onclick='caricavideo("+JSON.stringify(data[i].videoID)+")'>"+data[i].category+ data[i].artist+data[i].title+data[i].videoID+"</button>");
+
+
+             main += "<div  class='card border-info mb-3' style='width: 16rem;height: 20rem; display: inline-block;'>";
+            main +=" <img class='card-img-top'  src ='https://img.youtube.com/vi/"+(JSON.stringify(data[i].videoID)).slice(1,-1)+"/default.jpg' value='"+JSON.stringify(data[i].videoID)+"' alt='Card image cap'>";
+             main += "<div class='card-body'> <p class='card-text'><b>"+ data[i].title +"</b><br>"+data[i].category+"<br>"+ data[i].artist+"</p></div></div> ";
+
           }
+           $(".container-fluid").html(main);
         }
 
         function caricavideo(data){
