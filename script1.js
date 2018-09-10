@@ -88,7 +88,7 @@
         player = new YT.Player('player', {
           height: '390',
           width: '640',
-          videoId: '8of3uhG1tCI',
+          videoId: currentVideo,
           rel: 0, //non inseerisci i video suggeriti da yt nel player
           events: {
             'onReady': onPlayerReady,
@@ -411,8 +411,17 @@
             return text;
         }
         function initHistory() {
-          var stateObj = { id: currentVideo };
-          history.replaceState(stateObj , currentVideo, "?id="+currentVideo);
+          var queryString = window.location.search;//getUrlVars()["id"];
+          var params = new URLSearchParams(queryString.substring(1));
+          var id=params.get("id");
+          if(id!=null){
+            var stateObj = { id: id };
+            history.replaceState(stateObj , currentVideo, "?id="+id);
+            newClock();
+            currentVideo=id;
+            current_reason="undentified";
+            caricaTab("Recent");
+          }
         }
         
 
