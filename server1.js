@@ -112,5 +112,62 @@ request.get(queryUrl, { json: true }, (err, res1, body) => {
 
 
 	});
-	//});
+	app.get('/info', (req,res)=>{
+	//var q = url.parse(request.url, true).query;
+		var artista= req.query.artist;
+		var title=req.query.title;
+		var info="";
+
+    			//PER IL MOMENTO CERCA SOLTANTO PER ARTISTA, FRA POCO FACCIO IN MODO CHE CERCHI ANCHE PER BAND E MUSICALARTIST
+    			//HO PRESO I RISULTATI solo IN INGLESE, 
+    			var url = "http://dbpedia.org/sparql";
+              
+				
+				var query=` PREFIX dbo: <http://dbpedia.org/ontology/>
+							PREFIX dbp: <http://dbpedia.org/property/>
+							PREFIX foaf:<http://xmlns.com/foaf/0.1/>
+							SELECT distinct ?artName ?songName ?relDate ?album ?len WHERE {
+							?artist foaf:name ?artName.
+							?song   foaf:name ?songName.
+							{
+							  ?song dbo:musicalArtist ?artist.
+							  OPTIONAL {?song dbo:genre ?genre.}
+							  OPTIONAL {?song dbo:album ?album.}
+							  OPTIONAL {?song dbo:releaseDate ?relDate.}
+							  OPTIONAL {?song dbp:length ?len.}
+
+
+							}UNION{
+							  ?song dbo:artist ?artist.
+							  OPTIONAL {?song dbo:genre ?genre.}
+							  OPTIONAL {?song dbo:album ?album.}
+							  OPTIONAL {?song dbo:releaseDate ?relDate.}
+							  OPTIONAL {?song dbp:length ?len.}
+							} 
+							.
+							filter  regex(?artName, '`+artista+`', 'i')
+							filter  regex(?songName, '`+title+`', 'i')
+							}`;
+
+
+
+//artist non contiene informazioni quali genere,data pubbl ecc..
+//id prendi da youtube
+
+				var queryUrl = encodeURI( url+"?query="+query );
+							//console.log(queryUrl);
+
+
+
+request.get(queryUrl, { json: true }, (err, res1, body) => {
+  if (err) { return console.log(err); }
+  //console.log(res1.statusCode);
+ if(res1.statusCode){
+  	console.log("res1.statusCode");
+  	res.json(body);
+  }
+
+  
+});
+});
     app.listen(8000, ()=>console.log("Listening on 8000"));
