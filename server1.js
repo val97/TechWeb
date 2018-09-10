@@ -57,7 +57,7 @@ app.get('/popularity',(req,res)=>{
 	}
     });
 
-app.get('/info', (req,res)=>{
+app.get('/abstract', (req,res)=>{
 	//var q = url.parse(request.url, true).query;
 		var artista= req.query.artist;
 		var title=req.query.title;
@@ -135,8 +135,6 @@ request.get(queryUrl, { json: true }, (err, res1, body) => {
 							  OPTIONAL {?song dbo:album ?album.}
 							  OPTIONAL {?song dbo:releaseDate ?relDate.}
 							  OPTIONAL {?song dbp:length ?len.}
-
-
 							}UNION{
 							  ?song dbo:artist ?artist.
 							  OPTIONAL {?song dbo:genre ?genre.}
@@ -170,4 +168,4 @@ request.get(queryUrl, { json: true }, (err, res1, body) => {
   
 });
 });
-    app.listen(8000, ()=>console.log("Listening on 8000"));
+app.listen(8000, ()=>console.log("Listening on 8000"));

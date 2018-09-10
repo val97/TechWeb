@@ -1,4 +1,4 @@
-      var tag = document.createElement('script');
+var tag = document.createElement('script');
 
       tag.src = "https://www.youtube.com/iframe_api";
       
@@ -8,7 +8,7 @@
       
       var recommender_size=20;    //dimensione tabella degli ultimi video visitati
       var currentVideo="8of3uhG1tCI";
-      var lastVideo=null;	//video precedente a quello attualmente visto
+      var lastVideo=null; //video precedente a quello attualmente visto
       var last_reason=null;
       var current_reason=null;
       //timer per controllare i secondi di video passati prima di salvarlo
@@ -19,49 +19,49 @@
 
       function savePopularity(){
         $.get("http://localhost:8000/popularity?to_id="+currentVideo+"&reason="+current_reason, function(data, status){
-      	  
+          
         });
-      	var vid_recent=[recommender_size];
-      	var size=caricarecent(vid_recent);
-      	var flag=false;
-      	if(lastVideo!=currentVideo)
+        var vid_recent=[recommender_size];
+        var size=caricarecent(vid_recent);
+        var flag=false;
+        if(lastVideo!=currentVideo)
           for(var i=0;i<size;i++){
-      	    if(lastVideo==vid_recent[i]){
+            if(lastVideo==vid_recent[i]){
               $.get("http://localhost:8000/popularity?from_id="+lastVideo+"&to_id="+currentVideo+"&reason="+current_reason, function(data, status){
-          	        //alert("last video: " + lastVideo + "\this video: " + currentVideo);
+                    //alert("last video: " + lastVideo + "\this video: " + currentVideo);
               });
-      	    }
-	  }
+            }
+    }
       }
       function caricaPopularity(ask,out){
-      	var prom=new Promise(function(resolve,reject){
-      		$.get("http://localhost:8000/popularity?from_id="+currentVideo+"&ask="+ask, function(data, status){
-      	  		var v=JSON.parse(data);
-      			for(var i = 0;i<v.length;i++)
-      				out[i]=v[i].to_id;
-      			
-      	  		resolve(v.length);
-      		});
-      	});
-      	return prom;
+        var prom=new Promise(function(resolve,reject){
+          $.get("http://localhost:8000/popularity?from_id="+currentVideo+"&ask="+ask, function(data, status){
+              var v=JSON.parse(data);
+            for(var i = 0;i<v.length;i++)
+              out[i]=v[i].to_id;
+            
+              resolve(v.length);
+          });
+        });
+        return prom;
       }
       function saveReason(category){
-	var out="undefined";
+  var out="undefined";
         if((category=="popLocAss")||(category=="popLocRel")){
           out="LocalPopularity";
         }else if((category=="popGlobAss")||(category=="popGlobRel")){
           out="GlobalPopularity";
         }else out=category;
-	last_reason=out;
+  last_reason=out;
       }
       function timedCount(){
         time=time+1;
-        if(time==10){	//se il viddeo e' stato visto
+        if(time==10){ //se il viddeo e' stato visto
           salvarecent(currentVideo);
-	      savePopularity();
-	  
+        savePopularity();
+    
         }
-	      if(time<10)
+        if(time<10)
           clock=setTimeout(timedCount, 1000);
        }
 
@@ -119,7 +119,7 @@
                               title=currVid.snippet.title;
                             
                               title=title.split("-");
-                              console.log(title);
+                              //console.log(title);
                               if(title.length==1){
                                
                                 title=title[0].split("|");
@@ -129,17 +129,23 @@
                                 artist=title[0].trim();
                                 title[0]=title[0].trim();
                                 var titolo=title[1].split("(")
-                                console.log("titolo"+titolo);
-                                $.get("http://localhost:8000/info?artist="+artist+"&title="+titolo[0].trim(), function(data, status){
+                               // console.log("titolo"+titolo);
+                                $.get("http://localhost:8000/abstract?artist="+artist+"&title="+titolo[0].trim(), function(data, status){
 
                                    var wiki="";
                                    wiki=data.results.bindings[0].Sabstract;
-                                    if(data.results.bindings[0].Sabstract)
+                                   var artist=data.results.bindings[0].abstract;
+                                    if(data.results.bindings[0].Sabstract){
                                       $('#wiki_container').html(wiki.value);
-                                    else
+                                      $('#artist_container').html(artist.value);
+                                    }
+                                    else{
                                       $('#wiki_container').html("no abs founded\n");
+                                      $('#artist_container').html("no abs founded\n");
+                                    }
+                                    
                                 });
-				       $.get("http://localhost:8000/info?artist="+artist+"&title="+titolo[0].trim(), function(data, status){
+                                $.get("http://localhost:8000/info?artist="+artist+"&title="+titolo[0].trim(), function(data, status){
                                   console.log("risposta: ");
                                    var wiki="";
                                    wiki=data.results.bindings[0];
@@ -202,23 +208,30 @@
       //viene riempita la lista delle canzoni iniziali
       function loadCatalog(data){
           for (var i = 0; i < data.length; i++) {
-             $("#main").append("<button data-dismiss='modal' onclick='caricavideo("+JSON.stringify(data[i].videoID)+")'>"+data[i].category+ data[i].artist+data[i].title+data[i].videoID+"</button>");
+             main += "<div  class='card border-info mb-3' style='width: 16rem;height: 20rem; display: inline-block;'>";
+            main +=" <img class='card-img-top'  src ='https://img.youtube.com/vi/"+(JSON.stringify(data[i].videoID)).slice(1,-1)+"/default.jpg' value='"+JSON.stringify(data[i].videoID)+"' alt='Card image cap'>";
+             main += "<div class='card-body'> <p class='card-text'><b>"+ data[i].title +"</b><br>"+data[i].category+"<br>"+ data[i].artist+"</p></div></div> ";
           }
+          $(".container-fluid").html(main);
         }
 
         function caricavideo(data){
             newClock();
-	    lastVideo=currentVideo;
+      lastVideo=currentVideo;
             currentVideo=data;
             player.loadVideoById(data, 0, "large");  //"0" secondi di inizio del video
             current_reason=last_reason;
+             $('#wiki_container').html(" ");
+            $('#artist_container').html(" ");
             var stateObj = {id:data};
             history.pushState(stateObj , data, "?id="+data);
             caricaTab("Recent");
+
+           
         }
-	function historyBack(id){
+  function historyBack(id){
             newClock();
-	    lastVideo=null;
+      lastVideo=null;
             currentVideo=id;
             player.loadVideoById(id, 0, "large");  //"0" secondi di inizio del video
         }
@@ -345,12 +358,12 @@
               }
             if((category=="popLocAss")||(category=="popLocRel")||(category=="popGlobAss")||(category=="popGlobRel")){
               info=false
-	      var prom=caricaPopularity(category,vid);
+        var prom=caricaPopularity(category,vid);
               prom.then(function(d){
-		dim=d;
+    dim=d;
                 var j=0;
                 takeInfoById(j);
-	      });      
+        });      
             }
             
             if (category=="search") {
@@ -500,4 +513,4 @@
       function init(){
           gapi.client.setApiKey("AIzaSyCmxhjyAdTBxuEOG_etapCgLYwIBpSmdbQ");
           gapi.client.load("youtube","v3",function(){ });
-      }
+}
