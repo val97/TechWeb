@@ -1,4 +1,3 @@
-
       var tag = document.createElement('script');
 
       tag.src = "https://www.youtube.com/iframe_api";
@@ -10,44 +9,50 @@
       var recommender_size=20;    //dimensione tabella degli ultimi video visitati
       var currentVideo="8of3uhG1tCI";
       var lastVideo=null;	//video precedente a quello attualmente visto
-
+      var last_reason=null;
+      var current_reason=null;
       //timer per controllare i secondi di video passati prima di salvarlo
       var clock;
-      var timerOn;
+      var timerOn=0;
       var time;
 
 
       function savePopularity(){
-        $.get("http://localhost:8000/popularity?from_id="+currentVideo, function(data, status){
+        $.get("http://localhost:8000/popularity?to_id="+currentVideo+"&reason="+current_reason, function(data, status){
       	  
         });
       	var vid_recent=[recommender_size];
       	var size=caricarecent(vid_recent);
       	var flag=false;
       	if(lastVideo!=currentVideo)
-        	  for(var i=0;i<size;i++){
-      	      if(lastVideo==vid_recent[i]){
-          	      $.get("http://localhost:8000/popularity?from_id="+lastVideo+"&to_id="+currentVideo, function(data, status){
+          for(var i=0;i<size;i++){
+      	    if(lastVideo==vid_recent[i]){
+              $.get("http://localhost:8000/popularity?from_id="+lastVideo+"&to_id="+currentVideo+"&reason="+current_reason, function(data, status){
           	        //alert("last video: " + lastVideo + "\this video: " + currentVideo);
-          	      });
-      	      }
-	          }
+              });
+      	    }
+	  }
       }
-      function caricaPopularity(reason,out){
+      function caricaPopularity(ask,out){
       	var prom=new Promise(function(resolve,reject){
-      		$.get("http://localhost:8000/popularity?from_id="+currentVideo+"&reason="+reason, function(data, status){
+      		$.get("http://localhost:8000/popularity?from_id="+currentVideo+"&ask="+ask, function(data, status){
       	  		var v=JSON.parse(data);
-      			if((reason=="popLocAss")||(reason=="popGlobAss")){
-      				for(var i = 0;i<v.length;i++)
-      					out[i]=v[i].id;
-      			}else{
-      				for(var i = 0;i<v.length;i++)
-      					out[i]=v[i].to_id;
-      			}
+      			for(var i = 0;i<v.length;i++)
+      				out[i]=v[i].to_id;
+      			
       	  		resolve(v.length);
       		});
       	});
       	return prom;
+      }
+      function saveReason(category){
+	var out="undefined";
+        if((category=="popLocAss")||(category=="popLocRel")){
+          out="LocalPopularity";
+        }else if((category=="popGlobAss")||(category=="popGlobRel")){
+          out="GlobalPopularity";
+        }else out=category;
+	last_reason=out;
       }
       function timedCount(){
         time=time+1;
@@ -60,6 +65,7 @@
           clock=setTimeout(timedCount, 1000);
        }
 
+      
       function startClock(){
         if(!timerOn){
           timerOn=1;
@@ -113,7 +119,7 @@
                               title=currVid.snippet.title;
                             
                               title=title.split("-");
-                             // console.log(title);
+                              console.log(title);
                               if(title.length==1){
                                
                                 title=title[0].split("|");
@@ -122,21 +128,16 @@
                               
                                 artist=title[0].trim();
                                 title[0]=title[0].trim();
-                                var titolo=title[1].split("(");
-                               // console.log("titolo"+titolo);
+                                var titolo=title[1].split("(")
+                                console.log("titolo"+titolo);
                                 $.get("http://localhost:8000/info?artist="+artist+"&title="+titolo[0].trim(), function(data, status){
 
                                    var wiki="";
-                                   var artistInfo="";
-                                   console.log(data);
-                                   if(data.results.bindings.length){
-                                      wiki=data.results.bindings[0].Sabstract;
-                                      artistInfo=data.results.bindings[0].abstract; //se si vogliono aggiungere le info del cantant
-                                        $('#wiki_container').html(wiki.value);
-                                      
-                                  }
-                                  else
-                                        $('#wiki_container').html("no abs founded\n");
+                                   wiki=data.results.bindings[0].Sabstract;
+                                    if(data.results.bindings[0].Sabstract)
+                                      $('#wiki_container').html(wiki.value);
+                                    else
+                                      $('#wiki_container').html("no abs founded\n");
                                 });
                             }
                          }
@@ -180,7 +181,6 @@
             title +="<b><h2>"+JSON.stringify(response.items[0].snippet.title)+"</h2></b>";
             desc += "<p>"+JSON.stringify(response.items[0].snippet.description)+"</p>";
             $('#description_container').html(desc);
-           // console.log(desc);
             $('#title_container').html(title);
           });
         
@@ -201,10 +201,10 @@
 
         function caricavideo(data){
             newClock();
-	          lastVideo=currentVideo
+	    lastVideo=currentVideo;
             currentVideo=data;
             player.loadVideoById(data, 0, "large");  //"0" secondi di inizio del video
-          
+            current_reason=last_reason;
         }
 
         function salvarecent(ID){
@@ -271,8 +271,7 @@
            
             
           }
-         
-            $(".tabcontent#"+category).html(html);
+          $(".tabcontent#"+category).html(html);
 
           $('img').click(function(){
                 caricavideo($(this).attr("value"));
@@ -285,6 +284,7 @@
         var resRel="";
 
         function caricaTab(category) {
+            saveReason(category);
 
             var i, tabcontent, tablinks;
             tabcontent = document.getElementsByClassName("tabcontent");
@@ -329,12 +329,12 @@
               }
             if((category=="popLocAss")||(category=="popLocRel")||(category=="popGlobAss")||(category=="popGlobRel")){
               info=false
-	            var prom=caricaPopularity(category,vid);
+	      var prom=caricaPopularity(category,vid);
               prom.then(function(d){
-		            dim=d;
+		dim=d;
                 var j=0;
                 takeInfoById(j);
-	            });      
+	      });      
             }
             
             if (category=="search") {
@@ -380,21 +380,20 @@
                 'type': 'video',
                 'maxResults':recommender_size
               }
-            });
-            request_related.execute(function(response){
-              resRel=response;
-              for(i=0;i<recommender_size;i++){
-                vid[i]=resRel.items[i];
-              }
-              stampa(vid,dim,category,info)
-
-            });
+              });
+              request_related.execute(function(response){
+                resRel=response;
+                for(i=0;i<recommender_size;i++){
+                  vid[i]=resRel.items[i];
+                }
+                stampa(vid,dim,category,info)
+  
+              });
             }
 
 
           if((category!="popLocAss")&&(category!="popLocRel")&&(category!="popGlobAss")&&(category!="popGlobRel"))
               stampa(vid,dim,category,info);
-      
         }
         function makeid() {
             var text = "";
