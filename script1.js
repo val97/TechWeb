@@ -113,7 +113,7 @@
                               title=currVid.snippet.title;
                             
                               title=title.split("-");
-                              console.log(title);
+                             // console.log(title);
                               if(title.length==1){
                                
                                 title=title[0].split("|");
@@ -122,16 +122,21 @@
                               
                                 artist=title[0].trim();
                                 title[0]=title[0].trim();
-                                var titolo=title[1].split("(")
-                                console.log("titolo"+titolo);
+                                var titolo=title[1].split("(");
+                               // console.log("titolo"+titolo);
                                 $.get("http://localhost:8000/info?artist="+artist+"&title="+titolo[0].trim(), function(data, status){
 
                                    var wiki="";
-                                   wiki=data.results.bindings[0].Sabstract;
-                                    if(data.results.bindings[0].Sabstract)
-                                      $('#wiki_container').html(wiki.value);
-                                    else
-                                      $('#wiki_container').html("no abs founded\n");
+                                   var artistInfo="";
+                                   console.log(data);
+                                   if(data.results.bindings.length){
+                                      wiki=data.results.bindings[0].Sabstract;
+                                      artistInfo=data.results.bindings[0].abstract; //se si vogliono aggiungere le info del cantant
+                                        $('#wiki_container').html(wiki.value);
+                                      
+                                  }
+                                  else
+                                        $('#wiki_container').html("no abs founded\n");
                                 });
                             }
                          }
@@ -175,6 +180,7 @@
             title +="<b><h2>"+JSON.stringify(response.items[0].snippet.title)+"</h2></b>";
             desc += "<p>"+JSON.stringify(response.items[0].snippet.description)+"</p>";
             $('#description_container').html(desc);
+           // console.log(desc);
             $('#title_container').html(title);
           });
         
@@ -195,7 +201,7 @@
 
         function caricavideo(data){
             newClock();
-	    lastVideo=currentVideo
+	          lastVideo=currentVideo
             currentVideo=data;
             player.loadVideoById(data, 0, "large");  //"0" secondi di inizio del video
           
@@ -265,7 +271,8 @@
            
             
           }
-          $(".tabcontent#"+category).html(html);
+         
+            $(".tabcontent#"+category).html(html);
 
           $('img').click(function(){
                 caricavideo($(this).attr("value"));
