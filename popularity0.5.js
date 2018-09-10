@@ -1,8 +1,9 @@
 var MongoClient = require('mongodb').MongoClient;
 var url_DB = "mongodb://localhost:27017/mydb";		//db statico (con nomi di collezioni prefissati)	
 var url = "mongodb://localhost:27017/";
-var debug=true;
-var gruppi=["1828","1838","1839"];
+var debug=false;
+var gruppi=["sfs","1829","1828"];
+//var gruppi=["1829","1828","1838","1839"];
 var collection=["ass","rel","vid","vid_rel"];	//ass contiene gli elementi relativi alla popolarita' assoluta
 					//rel contiene gli elementi relativi alla popolarita' relativa
 					//vid continene tutti i possibili id di video
@@ -34,6 +35,7 @@ exports.findLocAss=findLocAss;
 exports.findGlobAss=findGlobAss;
 exports.findLocRel=findLocRel;
 exports.findGlobRel=findGlobRel;
+exports.isUpdating=isUpdating;
 
 
 function reset(){		//resetta tutto (non so se sia effettivamente necessario usarlo)
@@ -56,13 +58,13 @@ function resetRec(i){
 		MongoClient.connect(url, function(err, db) {
 			if (err) throw err;
 			var dbo = db.db("mydb");
-			console.log("dentro for: i = "+i+" "+targhet);
+			//console.log("dentro for: i = "+i+" "+targhet);
 			dbo.createCollection(targhet, function(err, res) {
 				if (err) throw err;
 				if(debug) console.log("Collection assolute created!");
 				dbo.collection(targhet).deleteMany({}, function(err, obj) {
     					if (err) throw err;
-    					console.log(obj.result.n + " document(s) deleted");
+    					//console.log(obj.result.n + " document(s) deleted");
 					resetRec(i+1);
     					db.close();
   				});
@@ -164,11 +166,11 @@ function updateAll(){
 	is_updating[1]=true;
 	var prom1=sumReasonAll("ass");	
 	prom1.then(function(){
-		console.log("sumReasonAll(ass) finished!!!");
+		if(debug) console.log("sumReasonAll(ass) finished!!!");
 	});
 	var prom2=sumReasonAll("rel");
 	prom2.then(function(){
-		console.log("sumReasonAll(rel) finished!!!");
+		if(debug) console.log("sumReasonAll(rel) finished!!!");
 	});
 	updateTot("ass");
 	updateTot("rel");
@@ -234,7 +236,7 @@ function updateTotLocal(data,i,collection){
 		});
 	}else{
 		if(collection=="ass")
-			is_updating[0]=false;
+			is_updating[0]=false;			
 		else
 			is_updating[1]=false;
 	}
@@ -287,7 +289,7 @@ function updateTotRec(data,i,collection){
 	}else{
 		if(collection=="ass")
 			is_updating[0]=false;
-		else
+		else									
 			is_updating[1]=false;
 	}
 }
@@ -320,7 +322,7 @@ function sumReason(data,collection,i){
 			prom=sumReasonId(data[i].id,null,0);
 		else
 			prom=sumReasonId(data[i].from_id,data[i].to_id,0);
-		console.log(counter);
+		if(debug) console.log("counter"+counter);
 		counter++;
 		prom.then(function(){
 			sumReason(data,collection,i+1);
@@ -397,33 +399,7 @@ function isUpdating(){
 	else
 		return false;
 }
-/*function updateTotAssRec(data,i){
-	if(i<data.length){
-		MongoClient.connect(url, function(err, db) {
-			if (err) throw err;
-  			var dbo = db.db("mydb");
-			dbo.collection("ass").find({id:data[i].id}).toArray(function(err,result){
-				if (err) throw err;
-				//console.log(result);
-				var tot=0;
-				console.log(result);
-				for(var j=0;j<result.length;j++){
-					if(result[j].from!="tot"){
-						tot=tot+result[j].num;
-					}
-				}
-				//console.log(tot);
-				dbo.collection("ass").update({id:data[i].id,from:"tot"}, {$set:{num:tot}},{ upsert: true }, function(err, res) {
-					if (err) throw err;
-					//console.log(tot)
-					updateTotAssRec(data,i+1);
-					if(debug) console.log("1 document updated!!");
-					db.close();
-				});
-			});
-		});
-	}
-}*/
+
 
 
 function findLocAss(){
@@ -506,7 +482,6 @@ function find(n,from_id,is_local,reason){				//trova gli n video piu visualizzat
 	return prom;
 }
 function findAll(collection){				//trova gli n video piu visualizzati
-	console.log("pippo");
 	var prom=new Promise(function(resolve,reject){
 		MongoClient.connect(url, function(err, db) {
 			if (err) throw err;
