@@ -147,8 +147,8 @@ var tag = document.createElement('script');
                                 });
                                 $.get("http://localhost:8000/info?artist="+artist+"&title="+titolo[0].trim(), function(data, status){
                                   console.log("risposta: ");
-                                   var wiki="";
-                                   wiki=data.results.bindings[0];
+                                   var info=data.results.bindings[0];
+                                   $('#info_container').html("album" +info.album.value+"<br> artista "+info.artName.value +"<br>reldate "+info.relDate.value);
                                    console.log(wiki);
                                 });
 
