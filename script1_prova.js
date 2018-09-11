@@ -419,64 +419,91 @@ var tag = document.createElement('script');
 
               });
             }
-         if(category== "ArtistSimilarity"){
-console.log("Ciao");
-            var currVid;
-            var resArtSim;
+        if(category== "ArtistSimilarity"){
+	alert("pippo3");
+	console.log("Ciao");
+        var currVid;
+	var html="";
+        var resArtSim;
+	var artist="";
 	$.ajax({
-	url: 'https://www.googleapis.com/youtube/v3/videos?key=' + 'AIzaSyCmxhjyAdTBxuEOG_etapCgLYwIBpSmdbQ' + '&id=' + currentVideo + '&part=snippet',
-                           success: function(data){ currVid=data.items[0];},
+		url: 'https://www.googleapis.com/youtube/v3/videos?key=' + 'AIzaSyCmxhjyAdTBxuEOG_etapCgLYwIBpSmdbQ' + '&id=' + currentVideo + '&part=snippet',
+                success: function(data){ currVid=data.items[0];},
+		
+                complete: function(){
+			alert("pippo2");
+			title=currVid.snippet.title;
+			console.log(title);
+			title=title.split("-");
+			console.log(title.length);
+			if(title.length==1){
+				console.log("if");
+				title=title[0].split("|");
+			}
 
-                           complete: function(){
-	title=currVid.snippet.title;
-console.log(title);
-	title=title.split("-");
-console.log(title.length);
-	if(title.length==1){
-console.log("if");
-	title=title[0].split("|");
-	}
+			if(title.length>1){
+			console.log("bla");
+			title[0]=title[0].trim();
+			var titolo=title[0].split("(");}
+			console.log("title[1]: "+title[1]);
 
-if(title.length>1){
-console.log("bla");
-title[0]=title[0].trim();
-var titolo=title[0].split("(");}
-console.log(title[0]);
-$.get("http://localhost:8000/#ArtistSimilarity?title="+title[0].trim(), function(data, status){
-var song="";
+			$.get("http://localhost:8000/Artist?title="+title[1].trim(), function(data, status){
+			var song="";
+			alert("pippo2.1");
+			console.log(data);
 
-console.log(status);	
-song=data.results.bindings[0].songName;
+			console.log("status: "+status);	
 
-var artist=data.results.bindings[0].artName;
-var album=data.results.bindings[0].album;
-var date=data.results.bindings[0].date;
+			if(data.results.bindings.length>0){
+			artist=data.results.bindings[0].artName;
+			//var album=data.results.bindings[0].album;
+			//var date=data.results.bindings[0].date;
 
-console.log(artist);
-if(data.results.bindings[0].songName){
-for(var j=0;j<data.length;j++){
-var request = gapi.client.youtube.search.list({
-                      q:song=data.results.bindings[0].songName,
-                      part: 'id',
-                      type: 'video',                //servono per far cercare soltanto video musicali
-                      videoCategoryId: '10',
-			maxResults:'1'
-                });
-request.execute(function(response){
-resArtSim[j]=response;});
-}
-var html="";
-for(var j=0;j<data.length;j++){
-html += "<div  class='card border-info mb-3' style='width: 16rem;display: inline-block;'>";
-                html+=" <img class='card-img-top'  src ='https://img.youtube.com/vi/"+resArtSim[j]+"/default.jpg' value='"+resArtSim[j]+"' alt='Card image cap'>";
-                html += "<div class='card-body'> <p class='card-text'><b>"+ title +"</b><br>"+data.results.bindings[0].album+"<br>"+ data.results.bindings[0].date+"</p></div></div> ";
-}
-$(".tabcontent#"+category).html(html);
-}
-}
-)}
 
-});
+			console.log("artist: "+artist);
+			$.get("http://localhost:8000/Song?artist="+artist, function(data, status){
+				alert("pippo1");
+				var album="";
+				album=data.results.bindings[0].album;
+				var date="";
+				date=data.results.bindings[0].date;
+				if(data.results.bindings[0].songName){
+
+					for(var j=0;j<recommender_size;j++){
+						var songs="";
+						songs=data.results.bindings[j].songName;
+						console.log("songs: ");
+						console.log(songs);
+						var request = gapi.client.youtube.search.list({
+							q:songs,
+							part: 'id',
+							type: 'video',                //servono per far cercare soltanto video musicali
+							videoCategoryId: '10',
+							maxResults:'1'
+						});
+						request.execute(function(response){
+						alert("pippo");
+						console.log("response: ");
+						console.log(response);
+						vid[j]=response.items[0].id.videoId;
+						//resArtSim[j]=response;
+						/*dim=songs.items.length;
+						for (var i = 0; i < dim; i++) {
+						      vid[i]=resSearch.items[i];*/
+						});
+
+					}
+
+					$(".tabcontent#"+category).html(html);
+					console.log(html);
+				}
+				stampa(vid,dim,category,info);
+			});
+			}
+			});
+		}
+	});
+
            
 	}
 
@@ -489,8 +516,8 @@ $(".tabcontent#"+category).html(html);
 
           }
 
-          if((category!="popLocAss")&&(category!="popLocRel")&&(category!="popGlobAss")&&(category!="popGlobRel"))
-              stampa(vid,dim,category,info);
+          /*if((category!="popLocAss")&&(category!="popLocRel")&&(category!="popGlobAss")&&(category!="popGlobRel"))
+              stampa(vid,dim,category,info);*/
         }
         function makeid() {
             var text = "";

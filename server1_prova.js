@@ -169,8 +169,8 @@ request.get(queryUrl, { json: true }, (err, res1, body) => {
 });
 
 
-app.get('/ArtistSimilarity',(req,res)=>{
-	var title=req.query.titolo;
+app.get('/Artist',(req,res)=>{
+	var title=req.query.title;
 		var url = "http://dbpedia.org/sparql";
 		var Artist= `PREFIX dbo: <http://dbpedia.org/ontology/>
 								PREFIX foaf:<http://xmlns.com/foaf/0.1/>
@@ -189,10 +189,10 @@ app.get('/ArtistSimilarity',(req,res)=>{
 												?song foaf:name ?songName.
 												?song dbo:musicalArtist ?artist.
 											}
-											filter (str(?songName)= '`+title+`')
+											filter (str(?songName)= "`+title+`")
 										}`; 
 
-			var queryArtist=`PREFIX dbo: <http://dbpedia.org/ontology/>
+		/*	var queryArtist=`PREFIX dbo: <http://dbpedia.org/ontology/>
 													SELECT distinct ?songName ?album ?date WHERE {
 														?artist a <http://dbpedia.org/ontology/MusicalArtist>.
 														?artist <http://xmlns.com/foaf/0.1/name> ?artName.
@@ -202,21 +202,59 @@ app.get('/ArtistSimilarity',(req,res)=>{
 														?song dbo:album ?album.
 														?song dbo:releaseDate ?date.
 														?song <http://xmlns.com/foaf/0.1/name> ?songName.
-														filter regex(?artName,'`+ Artist +`', 'i')
+														filter regex(?artName,'`+ Artist.results.bindings[0] +`', 'i')
 														filter ( langMatches(lang(?abstract), 'it'))
 													}
 													ORDER BY ?album DESC(?date) `;
-			var queryUrlSimilarityA = encodeURI( url+"?query="+queryArtist);
+			*/
+			console.log("artista: "+Artist);
+			var queryUrlSimilarityA = encodeURI( url+"?query="+Artist);
+			//console.log( queryUrlSimilarityA);
 			request.get(queryUrlSimilarityA, { json: true }, (err, res1,body) => {
 			  if (err) { return console.log(err); }
-			  console.log(res1.statusCode);
+			  //console.log(res1.statusCode);
 			 if(res1.statusCode){
-			  	console.log("res1.statusCode");
+			  	console.log("body: ");
+				console.log(body);
 			  	res.json(body);	
 			  }
 
 
 			});
+});
+
+
+app.get('/Song',(req,res)=>{
+	var artist=req.query.artist;
+console.log(artist);
+		var url = "http://dbpedia.org/sparql";
+var queryArtist=`PREFIX dbo: <http://dbpedia.org/ontology/>
+		SELECT distinct ?songName ?album ?date WHERE {
+		?artist a <http://dbpedia.org/ontology/MusicalArtist>.
+		?artist <http://xmlns.com/foaf/0.1/name> ?artName.
+		?artist dbo:abstract ?abstract .
+		?song <http://dbpedia.org/ontology/artist> ?artist.
+		?song dbo:abstract ?Sabstract .
+		?song dbo:album ?album.
+		?song dbo:releaseDate ?date.
+		?song <http://xmlns.com/foaf/0.1/name> ?songName.
+		filter regex(?artName,'`+ artist +`', 'i')
+		filter ( langMatches(lang(?abstract), 'it'))
+		}
+	ORDER BY ?album DESC(?date) `;
+var queryUrlSimilarityA = encodeURI( url+"?query="+ queryArtist);
+console.log(queryUrlSimilarityA);
+request.get(queryUrlSimilarityA, { json: true }, (err, res1,body) => {
+			  if (err) { return console.log(err); }
+			  console.log(res1.statusCode);
+			 if(res1.statusCode){
+			  	console.log(body);
+			  	res.json(body);	
+			  }
+
+
+			});
+
 });
 
 app.get('/GenreSimilarity',(req,res)=>{
