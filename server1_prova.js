@@ -10,15 +10,14 @@ const request = require('request');
 
 const express=require('express');
 const app=express();
-
 app.get('/',(req,res)=>{
-		html = fs.readFileSync("alpha.html", "utf8");				//prima era progetto!!!
+		html = fs.readFileSync("alpha_prova.html", "utf8");				//prima era progetto!!!
         res.send(html);
 });
 
 
-app.get('/script1.js',(req,res)=>{
-	 script = fs.readFileSync("script1.js", "utf8");
+app.get('/script1_prova.js',(req,res)=>{
+	 script = fs.readFileSync("script1_prova.js", "utf8");
         res.send(script);
 });
 
@@ -171,11 +170,10 @@ request.get(queryUrl, { json: true }, (err, res1, body) => {
 
 
 app.get('/ArtistSimilarity',(req,res)=>{
-	var title=req.query.title;
+	var title=req.query.titolo;
 		var url = "http://dbpedia.org/sparql";
 		var Artist= `PREFIX dbo: <http://dbpedia.org/ontology/>
 								PREFIX foaf:<http://xmlns.com/foaf/0.1/>
-
 									SELECT  distinct ?artName  WHERE{
 										{
 												?artist a <http://dbpedia.org/ontology/MusicalArtist>.
@@ -191,32 +189,30 @@ app.get('/ArtistSimilarity',(req,res)=>{
 												?song foaf:name ?songName.
 												?song dbo:musicalArtist ?artist.
 											}
-											FILTER (str(?songName)= `+title+`)
-										}`;
+											filter (str(?songName)= '`+title+`')
+										}`; 
 
 			var queryArtist=`PREFIX dbo: <http://dbpedia.org/ontology/>
 													SELECT distinct ?songName ?album ?date WHERE {
-
 														?artist a <http://dbpedia.org/ontology/MusicalArtist>.
 														?artist <http://xmlns.com/foaf/0.1/name> ?artName.
-
 														?artist dbo:abstract ?abstract .
 														?song <http://dbpedia.org/ontology/artist> ?artist.
 														?song dbo:abstract ?Sabstract .
 														?song dbo:album ?album.
 														?song dbo:releaseDate ?date.
 														?song <http://xmlns.com/foaf/0.1/name> ?songName.
-														FILTER regex(?artName,"`+ Artist +`", "i")
-														FILTER ( langMatches(lang(?abstract), 'it'))
+														filter regex(?artName,'`+ Artist +`', 'i')
+														filter ( langMatches(lang(?abstract), 'it'))
 													}
 													ORDER BY ?album DESC(?date) `;
 			var queryUrlSimilarityA = encodeURI( url+"?query="+queryArtist);
-			request.get(queryUrl, { json: true }, (err, res1, body) => {
+			request.get(queryUrlSimilarityA, { json: true }, (err, res1,body) => {
 			  if (err) { return console.log(err); }
-			  //console.log(res1.statusCode);
+			  console.log(res1.statusCode);
 			 if(res1.statusCode){
 			  	console.log("res1.statusCode");
-			  	res.json(body);
+			  	res.json(body);	
 			  }
 
 
@@ -227,21 +223,17 @@ app.get('/GenreSimilarity',(req,res)=>{
 	var title=req.query.title;
 	var url = "http://dbpedia.org/sparql";
 	var genere=`PREFIX dbo: <http://dbpedia.org/ontology/>
-
 									SELECT ?genereNome WHERE{
-
 										?song a <http://dbpedia.org/ontology/MusicalWork>.
 										?song <http://xmlns.com/foaf/0.1/name> ?songName.
 										?song dbo:genre ?genere.
 										?genere <http://xmlns.com/foaf/0.1/name> ?genereNome.
-
 										FILTER regex(?songName, "`+ title +`")
 									}`;
 									//prendere il titolo della canzone corrente
 
 			var Artist= `PREFIX dbo: <http://dbpedia.org/ontology/>
 											PREFIX foaf:<http://xmlns.com/foaf/0.1/>
-
 											SELECT  distinct ?artName  WHERE{
 											{
 												?artist a <http://dbpedia.org/ontology/MusicalArtist>.
@@ -260,16 +252,13 @@ app.get('/GenreSimilarity',(req,res)=>{
 												FILTER (str(?songName)= `+Stupid in Love+`)
 												}`;
 		var queryGenre=`PREFIX dbo: <http://dbpedia.org/ontology/>
-
 												SELECT ?songName ?artistName ?genereNome WHERE{
-
 													?song a <http://dbpedia.org/ontology/MusicalWork>.
 													?song <http://xmlns.com/foaf/0.1/name> ?songName
 													?song dbo:genre ?genere.
 													?genere <http://xmlns.com/foaf/0.1/name> ?genereNome.
 													?song dbo:artist ?artist.
 													?artist <http://xmlns.com/foaf/0.1/name> ?artistName.
-
 													FILTER regex(?genereNome, "`+ genere +`").
 													FILTER ( ?artistName != "`+ Artist+`")
 												}`;
@@ -290,9 +279,7 @@ app.get('/BandSimilarity',(req,res)=>{
 	var url = "http://dbpedia.org/sparql";
 
 var band=`PREFIX dbo: <http://dbpedia.org/ontology/>
-
 							SELECT  ?bandName WHERE{
-
 								?song a <http://dbpedia.org/ontology/MusicalWork>.
 								?song <http://xmlns.com/foaf/0.1/name> ?songName.
 								?song dbo:musicalBand ?band.
@@ -321,32 +308,25 @@ var membriBand=` PREFIX dbo:<http://dbpedia.org/ontology/>
 for(var i=0; i<membriBand.length; i++){
 					var queryBand= `PREFIX dbo: <http://dbpedia.org/ontology/>
 								PREFIX foaf:<http://xmlns.com/foaf/0.1/>
-
 								SELECT  distinct ?songName ?bandName WHERE{
 									{
 											?artist a <http://dbpedia.org/ontology/MusicalArtist>.
 											?artist foaf:name ?artName.
-
 											?band foaf:name ?bandName.
 											?band dbo:formerBandMember ?artist.
-
 											?song a <http://dbpedia.org/ontology/MusicalWork>.
 											?song foaf:name ?songName.
 											?song dbo:musicalBand ?band.
 										}
 										UNION
 										{
-
 											?artist a <http://dbpedia.org/ontology/MusicalArtist>.
 											?artist foaf:name ?artName.
-
 											?band foaf:name ?bandName.
 											?band dbo:bandMember ?artist.
-
 											?song a <http://dbpedia.org/ontology/MusicalWork>.
 											?song foaf:name ?songName.
 											?song dbo:musicalBand ?band.
-
 										}
 										FILTER regex(?artName, "`+membriBand[i]+`").
 										FILTER ( str(?bandName) != "`+band+`")
