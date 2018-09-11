@@ -435,13 +435,16 @@ var tag = document.createElement('script');
           var params = new URLSearchParams(queryString.substring(1));
           var id=params.get("id");
           if(id!=null){
-            var stateObj = { id: id };
-            history.replaceState(stateObj , currentVideo, "?id="+id);
             newClock();
             currentVideo=id;
-            current_reason="undentified";
-            caricaTab("Recent");
+          }else{
+            id=currentVideo;
           }
+          var stateObj = { id: id };
+          history.replaceState(stateObj , currentVideo, "?id="+id);
+          current_reason="undentified";
+          caricaTab("Recent");
+          
         }
         
 
