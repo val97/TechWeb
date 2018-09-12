@@ -577,17 +577,18 @@ var tag = document.createElement('script');
 
 
     					});
+              //
 
     					$(".tabcontent#"+category).html(html);
     					console.log(html);
 
     				stampa(vid,dim,category,info);
-            }
-
+          }
     			});
     		}
     	});
-
+    }
+});
 
     }
 
