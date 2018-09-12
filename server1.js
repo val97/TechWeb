@@ -103,8 +103,9 @@ app.get('/abstract', (req,res)=>{
 request.get(queryUrl, { json: true }, (err, res1, body) => {
   if (err) { return console.log(err); }
   //console.log(res1.statusCode);
- if(res1.statusCode){
+ if(body.results.bindings.length){
   	console.log(res1.statusCode);
+
   	res.json(body);
   }
 });
@@ -135,12 +136,17 @@ request.get(queryUrl, { json: true }, (err, res1, body) => {
 							  OPTIONAL {?song dbo:album ?album.}
 							  OPTIONAL {?song dbo:releaseDate ?relDate.}
 							  OPTIONAL {?song dbp:length ?len.}
+							  OPTIONAL {?song foaf:primaryTopic  ?wik.}
+							  
+
 							}UNION{
 							  ?song dbo:artist ?artist.
 							  OPTIONAL {?song dbo:genre ?genre.}
 							  OPTIONAL {?song dbo:album ?album.}
 							  OPTIONAL {?song dbo:releaseDate ?relDate.}
 							  OPTIONAL {?song dbp:length ?len.}
+							  OPTIONAL {?song foaf:primaryTopicOf  ?wik.}
+							  
 							} 
 							.
 							filter  regex(?artName, '`+artista+`', 'i')
@@ -164,8 +170,9 @@ request.get(queryUrl, { json: true }, (err, res1, body) => {
   	console.log("res1.statusCode");
   	res.json(body);
   }
-
+ 
   
 });
 });
 app.listen(8000, ()=>console.log("Listening on 8000"));
+

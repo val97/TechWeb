@@ -31,7 +31,7 @@ var tag = document.createElement('script');
                     //alert("last video: " + lastVideo + "\this video: " + currentVideo);
               });
             }
-    }
+          }
       }
       function caricaPopularity(ask,out){
         var prom=new Promise(function(resolve,reject){
@@ -46,13 +46,13 @@ var tag = document.createElement('script');
         return prom;
       }
       function saveReason(category){
-  var out="undefined";
+        var out="undefined";
         if((category=="popLocAss")||(category=="popLocRel")){
           out="LocalPopularity";
         }else if((category=="popGlobAss")||(category=="popGlobRel")){
           out="GlobalPopularity";
         }else out=category;
-  last_reason=out;
+       last_reason=out;
       }
       function timedCount(){
         time=time+1;
@@ -132,13 +132,14 @@ var tag = document.createElement('script');
                                // console.log("titolo"+titolo);
                                 $.get("http://localhost:8000/abstract?artist="+artist+"&title="+titolo[0].trim(), function(data, status){
 
-                                   var wiki="";
-                                   wiki=data.results.bindings[0].Sabstract;
-                                   var artist=data.results.bindings[0].abstract;
+                                 if(data.results.bindings[0]){
+                                    var wiki=data.results.bindings[0];
+                                    var artist=data.results.bindings[0].abstract;
                                     if(data.results.bindings[0].Sabstract){
                                       $('#wiki_container').html(wiki.value);
                                       $('#artist_container').html(artist.value);
                                     }
+                                  }
                                     else{
                                       $('#wiki_container').html("no abs founded\n");
                                       $('#artist_container').html("no abs founded\n");
@@ -147,9 +148,18 @@ var tag = document.createElement('script');
                                 });
                                 $.get("http://localhost:8000/info?artist="+artist+"&title="+titolo[0].trim(), function(data, status){
                                   console.log("risposta: ");
-                                   var info=data.results.bindings[0];
-                                   $('#info_container').html("album" +info.album.value+"<br> artista "+info.artName.value +"<br>reldate "+info.relDate.value);
-                                   console.log(wiki);
+                                   
+                                   if(data.results.bindings[0]){
+                                    var info=data.results.bindings[0];
+                                     if(info.album.value)
+                                        $('#info_container').append("<a href= "+info.album.value+">album:" +info.album.value+"</a><br>");
+                                     if(info.artName.value) 
+                                        $('#info_container').append("artista" +info.artName.value+"<br>");
+                                    if(info.relDate.value)
+                                        $('#info_container').append("relDate" +info.relDate.value+"<br>");
+                                      if(info.wik.value)
+                                        $('#info_container').append("wiki" +info.wik.value+"<br>");
+                                }
                                 });
 
                             }
@@ -217,7 +227,7 @@ var tag = document.createElement('script');
 
         function caricavideo(data){
             newClock();
-      lastVideo=currentVideo;
+           lastVideo=currentVideo;
             currentVideo=data;
             player.loadVideoById(data, 0, "large");  //"0" secondi di inizio del video
             current_reason=last_reason;
@@ -231,7 +241,7 @@ var tag = document.createElement('script');
         }
   function historyBack(id){
             newClock();
-      lastVideo=null;
+            lastVideo=null;
             currentVideo=id;
             player.loadVideoById(id, 0, "large");  //"0" secondi di inizio del video
         }
@@ -341,7 +351,7 @@ var tag = document.createElement('script');
                            complete: function(){
                               if(j<20)
                                 takeInfoById(j);
-                              if(j==20)
+                             if(j==20)
                                 stampa(vid,dim,category,info);
                            }
                         });
@@ -358,9 +368,9 @@ var tag = document.createElement('script');
               }
             if((category=="popLocAss")||(category=="popLocRel")||(category=="popGlobAss")||(category=="popGlobRel")){
               info=false
-        var prom=caricaPopularity(category,vid);
+              var prom=caricaPopularity(category,vid);
               prom.then(function(d){
-    dim=d;
+              dim=d;
                 var j=0;
                 takeInfoById(j);
         });      
@@ -378,6 +388,8 @@ var tag = document.createElement('script');
                   for (var i = 0; i < dim; i++) {
                       vid[i]=resSearch.items[i];
                   }
+                   stampa(vid,dim,category,info);
+  
               }
             }
             if(category=="Fvitali"){
@@ -397,6 +409,8 @@ var tag = document.createElement('script');
               for (var i = 0; i < 20; i++) {
                   vid[i]=resRand.items[i];
               }
+               stampa(vid,dim,category,info)
+  
             }
          
           if(category =="Related"){
@@ -419,10 +433,6 @@ var tag = document.createElement('script');
   
               });
             }
-
-
-          if((category!="popLocAss")&&(category!="popLocRel")&&(category!="popGlobAss")&&(category!="popGlobRel"))
-              stampa(vid,dim,category,info);
         }
         function makeid() {
             var text = "";
