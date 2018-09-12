@@ -510,7 +510,7 @@ var tag = document.createElement('script');
 
 
           if(category== "GenreSimilarity"){
-/*
+
             var currVid;
     	var html="";
     	var artist="";
@@ -519,7 +519,6 @@ var tag = document.createElement('script');
                     success: function(data){ currVid=data.items[0];},
 
                     complete: function(){
-    			alert("pippo2");
     			title=currVid.snippet.title;
     			console.log(title);
     			title=title.split("-");
@@ -541,44 +540,55 @@ var tag = document.createElement('script');
 
     			if(data.results.bindings.length>0){
     			genere=data.results.bindings[0].genereNome;
+          var songs="";
 
-    			$.get("http://localhost:8000/GenreArtist?title="+title[1].trim(), function(data, status){
+    			$.get("http://localhost:8000/Genre?title="+genere, +artist, function(data, status){
 
     				if(data.results.bindings[0].artName){
-
-
     						artist=data.results.bindings[j].artName;
-    						var request = gapi.client.youtube.search.list({
-    							q:songs,
-    							part: 'id',
-    							type: 'video',                //servono per far cercare soltanto video musicali
-    							videoCategoryId: '10',
-    							maxResults:'1'
-    						});
-    						request.execute(function(response){
-    						alert("pippo");
-    						console.log("response: ");
-    						console.log(response);
-    						vid[j]=response.items[0].id.videoId;
-    						//resArtSim[j]=response;
-    						/*dim=songs.items.length;
-    						for (var i = 0; i < dim; i++) {
-    						      vid[i]=resSearch.items[i];*/
-    						});
+                $.get("http://localhost:8000/GenreArtist?title="+title[1].trim(), function(data, status){
 
-    					}
+                  if(data.results.bindings[0].genereNome){
+                    for(var j=0;j<recommender_size;j++){
+                      var songs="";
+                      songs=data.results.bindings[j].songName;
+                      console.log("songs: ");
+                      console.log(songs);
+                      var request = gapi.client.youtube.search.list({
+                        q:songs,
+                        part: 'id',
+                        type: 'video',                //servono per far cercare soltanto video musicali
+                        videoCategoryId: '10',
+                        maxResults:'1'
+                      });
+                      request.execute(function(response){
+                      alert("pippo");
+                      console.log("response: ");
+                      console.log(response);
+                      vid[j]=response.items[0].id.videoId;
+                      //resArtSim[j]=response;
+                      /*dim=songs.items.length;
+                      for (var i = 0; i < dim; i++) {
+                            vid[i]=resSearch.items[i];*/
+                      });
+
+                    }
+                    }
+
+
+    					});
 
     					$(".tabcontent#"+category).html(html);
     					console.log(html);
 
     				stampa(vid,dim,category,info);
-    			});
-    			}
+            }
+
     			});
     		}
     	});
 
-*/
+
     }
 
           if(category== "BandSimilarity"){
