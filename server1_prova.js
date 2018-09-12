@@ -310,12 +310,12 @@ app.get('/GenreArtist',(req,res)=>{
 
 
 app.get('/Genre',(req,res)=>{
-	var title=req.query.title;
+	//var title=req.query.title;
 		var url = "http://dbpedia.org/sparql";
 		var queryGenre=`PREFIX dbo: <http://dbpedia.org/ontology/>
 												SELECT ?songName ?artistName ?genereNome WHERE{
 													?song a <http://dbpedia.org/ontology/MusicalWork>.
-													?song <http://xmlns.com/foaf/0.1/name> ?songName
+													?song <http://xmlns.com/foaf/0.1/name> ?songName.
 													?song dbo:genre ?genere.
 													?genere <http://xmlns.com/foaf/0.1/name> ?genereNome.
 													?song dbo:artist ?artist.
