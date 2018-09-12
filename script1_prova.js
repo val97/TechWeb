@@ -17,7 +17,7 @@ var tag = document.createElement('script');
       var time;
 
 
-      function savePopularity(){
+    /*  function savePopularity(){
         $.get("http://localhost:8000/popularity?to_id="+currentVideo+"&reason="+current_reason, function(data, status){
 
         });
@@ -53,14 +53,15 @@ var tag = document.createElement('script');
           out="GlobalPopularity";
         }else out=category;
   last_reason=out;
-      }
+}*/
       function timedCount(){
         time=time+1;
         if(time==10){ //se il viddeo e' stato visto
           salvarecent(currentVideo);
-        savePopularity();
+        //savePopularity();
 
         }
+
         if(time<10)
           clock=setTimeout(timedCount, 1000);
        }
@@ -429,7 +430,7 @@ var tag = document.createElement('script');
 	$.ajax({
 		url: 'https://www.googleapis.com/youtube/v3/videos?key=' + 'AIzaSyCmxhjyAdTBxuEOG_etapCgLYwIBpSmdbQ' + '&id=' + currentVideo + '&part=snippet',
                 success: function(data){ currVid=data.items[0];},
-		
+
                 complete: function(){
 			alert("pippo2");
 			title=currVid.snippet.title;
@@ -452,7 +453,7 @@ var tag = document.createElement('script');
 			alert("pippo2.1");
 			console.log(data);
 
-			console.log("status: "+status);	
+			console.log("status: "+status);
 
 			if(data.results.bindings.length>0){
 			artist=data.results.bindings[0].artName;
@@ -504,13 +505,81 @@ var tag = document.createElement('script');
 		}
 	});
 
-           
+
 	}
 
-          
-          if(category== "GenreSimilarity"){
 
-          }
+          if(category== "GenreSimilarity"){
+/*
+            var currVid;
+    	var html="";
+    	var artist="";
+    	$.ajax({
+    		url: 'https://www.googleapis.com/youtube/v3/videos?key=' + 'AIzaSyCmxhjyAdTBxuEOG_etapCgLYwIBpSmdbQ' + '&id=' + currentVideo + '&part=snippet',
+                    success: function(data){ currVid=data.items[0];},
+
+                    complete: function(){
+    			alert("pippo2");
+    			title=currVid.snippet.title;
+    			console.log(title);
+    			title=title.split("-");
+    			console.log(title.length);
+    			if(title.length==1){
+    				console.log("if");
+    				title=title[0].split("|");
+    			}
+
+    			if(title.length>1){
+    			console.log("bla");
+    			title[0]=title[0].trim();
+    			var titolo=title[0].split("(");}
+    			console.log("title[1]: "+title[1]);
+
+    			$.get("http://localhost:8000/GenreSimilarity?title="+title[1].trim(), function(data, status){
+    			var genere="";
+
+
+    			if(data.results.bindings.length>0){
+    			genere=data.results.bindings[0].genereNome;
+
+    			$.get("http://localhost:8000/GenreArtist?title="+title[1].trim(), function(data, status){
+
+    				if(data.results.bindings[0].artName){
+
+
+    						artist=data.results.bindings[j].artName;
+    						var request = gapi.client.youtube.search.list({
+    							q:songs,
+    							part: 'id',
+    							type: 'video',                //servono per far cercare soltanto video musicali
+    							videoCategoryId: '10',
+    							maxResults:'1'
+    						});
+    						request.execute(function(response){
+    						alert("pippo");
+    						console.log("response: ");
+    						console.log(response);
+    						vid[j]=response.items[0].id.videoId;
+    						//resArtSim[j]=response;
+    						/*dim=songs.items.length;
+    						for (var i = 0; i < dim; i++) {
+    						      vid[i]=resSearch.items[i];*/
+    						});
+
+    					}
+
+    					$(".tabcontent#"+category).html(html);
+    					console.log(html);
+
+    				stampa(vid,dim,category,info);
+    			});
+    			}
+    			});
+    		}
+    	});
+
+*/
+    }
 
           if(category== "BandSimilarity"){
 
