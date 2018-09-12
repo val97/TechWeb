@@ -1,11 +1,11 @@
 var tag = document.createElement('script');
 
       tag.src = "https://www.youtube.com/iframe_api";
-
+      
       var firstScriptTag = document.getElementsByTagName('script')[0];
       firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
 
-
+      
       var recommender_size=20;    //dimensione tabella degli ultimi video visitati
       var currentVideo="8of3uhG1tCI";
       var lastVideo=null; //video precedente a quello attualmente visto
@@ -17,9 +17,9 @@ var tag = document.createElement('script');
       var time;
 
 
-    /*  function savePopularity(){
+      function savePopularity(){
         $.get("http://localhost:8000/popularity?to_id="+currentVideo+"&reason="+current_reason, function(data, status){
-
+          
         });
         var vid_recent=[recommender_size];
         var size=caricarecent(vid_recent);
@@ -31,7 +31,7 @@ var tag = document.createElement('script');
                     //alert("last video: " + lastVideo + "\this video: " + currentVideo);
               });
             }
-    }
+          }
       }
       function caricaPopularity(ask,out){
         var prom=new Promise(function(resolve,reject){
@@ -39,34 +39,33 @@ var tag = document.createElement('script');
               var v=JSON.parse(data);
             for(var i = 0;i<v.length;i++)
               out[i]=v[i].to_id;
-
+            
               resolve(v.length);
           });
         });
         return prom;
       }
       function saveReason(category){
-  var out="undefined";
+        var out="undefined";
         if((category=="popLocAss")||(category=="popLocRel")){
           out="LocalPopularity";
         }else if((category=="popGlobAss")||(category=="popGlobRel")){
           out="GlobalPopularity";
         }else out=category;
-  last_reason=out;
-}*/
+       last_reason=out;
+      }
       function timedCount(){
         time=time+1;
         if(time==10){ //se il viddeo e' stato visto
           salvarecent(currentVideo);
-        //savePopularity();
-
+        savePopularity();
+    
         }
-
         if(time<10)
           clock=setTimeout(timedCount, 1000);
        }
 
-
+      
       function startClock(){
         if(!timerOn){
           timerOn=1;
@@ -98,7 +97,7 @@ var tag = document.createElement('script');
         });
       }
 
-
+      
       function onPlayerReady(event) {
         event.target.playVideo();
       }
@@ -116,41 +115,51 @@ var tag = document.createElement('script');
 
                            complete: function(){
 
-
+                            
                               title=currVid.snippet.title;
-
+                            
                               title=title.split("-");
                               //console.log(title);
                               if(title.length==1){
-
+                               
                                 title=title[0].split("|");
 
                               }if(title.length>1){
-
+                              
                                 artist=title[0].trim();
                                 title[0]=title[0].trim();
                                 var titolo=title[1].split("(")
                                // console.log("titolo"+titolo);
                                 $.get("http://localhost:8000/abstract?artist="+artist+"&title="+titolo[0].trim(), function(data, status){
 
-                                   var wiki="";
-                                   wiki=data.results.bindings[0].Sabstract;
-                                   var artist=data.results.bindings[0].abstract;
+                                 if(data.results.bindings[0]){
+                                    var wiki=data.results.bindings[0];
+                                    var artist=data.results.bindings[0].abstract;
                                     if(data.results.bindings[0].Sabstract){
                                       $('#wiki_container').html(wiki.value);
                                       $('#artist_container').html(artist.value);
                                     }
+                                  }
                                     else{
                                       $('#wiki_container').html("no abs founded\n");
                                       $('#artist_container').html("no abs founded\n");
                                     }
-
+                                    
                                 });
                                 $.get("http://localhost:8000/info?artist="+artist+"&title="+titolo[0].trim(), function(data, status){
                                   console.log("risposta: ");
-                                   var wiki="";
-                                   wiki=data.results.bindings[0];
-                                   console.log(wiki);
+                                   
+                                   if(data.results.bindings[0]){
+                                    var info=data.results.bindings[0];
+                                     if(info.album.value)
+                                        $('#info_container').append("<a href= "+info.album.value+">album:" +info.album.value+"</a><br>");
+                                     if(info.artName.value) 
+                                        $('#info_container').append("artista" +info.artName.value+"<br>");
+                                    if(info.relDate.value)
+                                        $('#info_container').append("relDate" +info.relDate.value+"<br>");
+                                      if(info.wik.value)
+                                        $('#info_container').append("wiki" +info.wik.value+"<br>");
+                                }
                                 });
 
                             }
@@ -158,7 +167,7 @@ var tag = document.createElement('script');
            });
          }
 
-
+     
       var done = false;
       function onPlayerStateChange(event) {
        if(event.data == YT.PlayerState.PLAYING){
@@ -175,13 +184,13 @@ var tag = document.createElement('script');
           });
           request.execute(function(response){
             var i;
-            var html="";
+            var html="";  
               for(i=0; i<response.items.length && i<20   ; i++){
                   html+="<img width='28' heigth='28' src="+JSON.stringify(response.items[i].snippet.topLevelComment.snippet.authorProfileImageUrl)+"> <b> "+ JSON.stringify(response.items[i].snippet.topLevelComment.snippet.authorDisplayName).slice(1,-1) +" </b> <br> "+ JSON.stringify(response.items[i].snippet.topLevelComment.snippet.textOriginal)+"<hr>";
                   $('#comment_container').html(html);
               }
           });
-
+      
         //DESCRIZIONE E TITOLO
           var request1 = gapi.client.youtube.videos.list({
             'method': 'get',
@@ -197,12 +206,12 @@ var tag = document.createElement('script');
             $('#description_container').html(desc);
             $('#title_container').html(title);
           });
-
+        
        }
         if(event.data == YT.PlayerState.PAUSED)
           stopClock();
       }
-
+      
 
 
 
@@ -218,7 +227,7 @@ var tag = document.createElement('script');
 
         function caricavideo(data){
             newClock();
-      lastVideo=currentVideo;
+           lastVideo=currentVideo;
             currentVideo=data;
             player.loadVideoById(data, 0, "large");  //"0" secondi di inizio del video
             current_reason=last_reason;
@@ -228,11 +237,11 @@ var tag = document.createElement('script');
             history.pushState(stateObj , data, "?id="+data);
             caricaTab("Recent");
 
-
+           
         }
   function historyBack(id){
             newClock();
-      lastVideo=null;
+            lastVideo=null;
             currentVideo=id;
             player.loadVideoById(id, 0, "large");  //"0" secondi di inizio del video
         }
@@ -247,9 +256,9 @@ var tag = document.createElement('script');
           }
 
           if(!exist){
-                var key=localStorage.getItem("counter");  //counter=valore della prossima chiave libera
+                var key=localStorage.getItem("counter");  //counter=valore della prossima chiave libera 
                 if (!key)    //se non esiste già
-                  key=0;
+                  key=0;  
                 localStorage.setItem(key, ID);
                 key++;
                 key=key%recommender_size;
@@ -276,18 +285,19 @@ var tag = document.createElement('script');
             success: function(data) {
 
               loadCatalog(data);
-
+             
             },
             error: function(data) {
               alert("Caricamento impossibile");
             }
-          });
+          });       
         }
         //riempie i recommender
        function stampa(vid, dim,category,info){
          var html="";
           for (var i = 0; i < dim; i++) {
             if(info){
+              console.log(vid);
                 html += "<div  class='card border-info mb-3' style='width: 16rem;display: inline-block;'>";
                 html+=" <img class='card-img-top'  src ='https://img.youtube.com/vi/"+vid[i].id.videoId+"/default.jpg' value='"+vid[i].id.videoId+"' alt='Card image cap'>";
                 html += "<div class='card-body'> <p class='card-text'><b>"+ vid[i].snippet.title +"</b><br>"+vid[i].snippet.channelTitle+"<br>"+ (vid[i].snippet.publishedAt).slice(0,-14)+"</p></div></div> ";
@@ -297,17 +307,17 @@ var tag = document.createElement('script');
                 html+=" <img class='card-img-top'  src ='https://img.youtube.com/vi/"+vid[i].id+"/default.jpg' value='"+vid[i].id+"' alt='Card image cap'>";
                 html += "<div class='card-body'> <p class='card-text'><b>"+ vid[i].snippet.title +"</b><br>"+vid[i].snippet.channelTitle+"<br>"+ (vid[i].snippet.publishedAt).slice(0,-14)+"</p></div></div> ";
             }
-
-
-
+          
+           
+            
           }
           $(".tabcontent#"+category).html(html);
-
+          console.log("esco da stampa");
           $('img').click(function(){
                 caricavideo($(this).attr("value"));
           });
         }
-
+       
         var resSearch="";
         var resRand="";
         var Fvit="";
@@ -327,7 +337,7 @@ var tag = document.createElement('script');
             }
             //serve per inserire le immagini nel tab
             document.getElementById(category).style.display = "block";
-
+           
             var dim=recommender_size;
             var vid=[recommender_size];
             var info=true;
@@ -342,7 +352,7 @@ var tag = document.createElement('script');
                            complete: function(){
                               if(j<20)
                                 takeInfoById(j);
-                              if(j==20)
+                             if(j==20)
                                 stampa(vid,dim,category,info);
                            }
                         });
@@ -355,30 +365,32 @@ var tag = document.createElement('script');
               var j=0;
 
               takeInfoById(j);
-
+                   
               }
             if((category=="popLocAss")||(category=="popLocRel")||(category=="popGlobAss")||(category=="popGlobRel")){
               info=false
-        var prom=caricaPopularity(category,vid);
+              var prom=caricaPopularity(category,vid);
               prom.then(function(d){
-    dim=d;
+              dim=d;
                 var j=0;
                 takeInfoById(j);
-        });
+        });      
             }
-
+            
             if (category=="search") {
               //controllo se sto cercando per id, se vero lancio direttamente il video legato all' id
-              if(resSearch.items[0].id.videoId==$('#query').val()){
+              if(resSearch.items[0].id.videoId==$('#query').val()){ 
                   dim=0;
                   caricavideo(resSearch.items[0].id.videoId);
               }
               //visualizzo la lista dei video cercati
-              else{
+              else{     
                   dim=resSearch.items.length;
                   for (var i = 0; i < dim; i++) {
                       vid[i]=resSearch.items[i];
                   }
+                   stampa(vid,dim,category,info);
+  
               }
             }
             if(category=="Fvitali"){
@@ -386,20 +398,22 @@ var tag = document.createElement('script');
               for (var i = 0; i <dim; i++) {
                 vid[i]=Fvit.recommended[i].videoID;
 
-              }
+              } 
               info =false;
               var j=0;
                   takeInfoById(j);
             }
 
-
+           
             if (category=="Random") {
               dim=20;
               for (var i = 0; i < 20; i++) {
                   vid[i]=resRand.items[i];
               }
+               stampa(vid,dim,category,info)
+  
             }
-
+         
           if(category =="Related"){
               var request_related = gapi.client.request({
               'method': 'get',
@@ -417,135 +431,150 @@ var tag = document.createElement('script');
                   vid[i]=resRel.items[i];
                 }
                 stampa(vid,dim,category,info)
-
+  
               });
             }
-        if(category== "ArtistSimilarity"){
-	alert("pippo3");
-	console.log("Ciao");
+            if(category== "ArtistSimilarity"){
+  //alert("pippo3");
+  console.log("Ciao");
         var currVid;
-	var html="";
+  var html="";
         var resArtSim;
-	var artist="";
-	$.ajax({
-		url: 'https://www.googleapis.com/youtube/v3/videos?key=' + 'AIzaSyCmxhjyAdTBxuEOG_etapCgLYwIBpSmdbQ' + '&id=' + currentVideo + '&part=snippet',
+  var artist="";
+  $.ajax({
+    url: 'https://www.googleapis.com/youtube/v3/videos?key=' + 'AIzaSyCmxhjyAdTBxuEOG_etapCgLYwIBpSmdbQ' + '&id=' + currentVideo + '&part=snippet',
                 success: function(data){ currVid=data.items[0];},
 
                 complete: function(){
-			alert("pippo2");
-			title=currVid.snippet.title;
-			console.log(title);
-			title=title.split("-");
-			console.log(title.length);
-			if(title.length==1){
-				console.log("if");
-				title=title[0].split("|");
-			}
+     // alert("pippo2");
+      title=currVid.snippet.title;
+                            
+                              title=title.split("-");
+                              //console.log(title);
+                              if(title.length==1){
+                               
+                                title=title[0].split("|");
 
-			if(title.length>1){
-			console.log("bla");
-			title[0]=title[0].trim();
-			var titolo=title[0].split("(");}
-			console.log("title[1]: "+title[1]);
+                              }if(title.length>1){
+                              
+                                artist=title[0].trim();
+                                title[0]=title[0].trim();
+                                var titolo=title[1].split("(");
+                                console.log("titolo" + titolo[0]);
+      /*title=currVid.snippet.title;
+      console.log(title);
+      title=title.split("-");
+      console.log(title.length);
+      if(title.length==1){
+        console.log("if");
+        title=title[0].split("|");*/
+      }
 
-			$.get("http://localhost:8000/Artist?title="+title[1].trim(), function(data, status){
-			var song="";
-			alert("pippo2.1");
-			console.log(data);
+      /*if(title.length>1){
+      console.log("bla");
+      title[0]=title[0].trim();
+      var titolo=title[0].split("(");}
+      console.log("title[1]: "+title[1]);*/
 
-			console.log("status: "+status);
+      $.get("http://localhost:8000/Artist?title="+titolo[0].trim(), function(data, status){
+      var song="";
+     // alert("pippo2.1");
+      console.log(data);
 
-			if(data.results.bindings.length>0){
-			artist=data.results.bindings[0].artName;
-			//var album=data.results.bindings[0].album;
-			//var date=data.results.bindings[0].date;
+      console.log("status: "+status);
 
-
-			console.log("artist: "+artist);
-			$.get("http://localhost:8000/Song?artist="+artist, function(data, status){
-				alert("pippo1");
-				var album="";
-				album=data.results.bindings[0].album;
-				var date="";
-				date=data.results.bindings[0].date;
-				if(data.results.bindings[0].songName){
-
-					for(var j=0;j<recommender_size;j++){
-						var songs="";
-						songs=data.results.bindings[j].songName;
-						console.log("songs: ");
-						console.log(songs);
-						var request = gapi.client.youtube.search.list({
-							q:songs,
-							part: 'id',
-							type: 'video',                //servono per far cercare soltanto video musicali
-							videoCategoryId: '10',
-							maxResults:'1'
-						});
-						request.execute(function(response){
-						alert("pippo");
-						console.log("response: ");
-						console.log(response);
-						vid[j]=response.items[0].id.videoId;
-						//resArtSim[j]=response;
-						/*dim=songs.items.length;
-						for (var i = 0; i < dim; i++) {
-						      vid[i]=resSearch.items[i];*/
-						});
-
-					}
-
-					$(".tabcontent#"+category).html(html);
-					console.log(html);
-				}
-				stampa(vid,dim,category,info);
-			});
-			}
-			});
-		}
-	});
+      if(data.results.bindings.length>0){
+      artist=data.results.bindings[0].artName;
+      //var album=data.results.bindings[0].album;
+      //var date=data.results.bindings[0].date;
 
 
-	}
+      console.log("artist: "+artist);
+      $.get("http://localhost:8000/Song?artist="+artist, function(data, status){
+        //alert("pippo1");
+        var album="";
+        album=data.results.bindings[0].album;
+        var date="";
+        date=data.results.bindings[0].date;
+        if(data.results.bindings[0].songName){
+
+          for(var j=0;j<recommender_size;j++){
+            var songs="";
+            songs=data.results.bindings[j].songName;
+            console.log("songs: ");
+            console.log(songs);
+            var request = gapi.client.youtube.search.list({
+              q:songs,
+              part: 'id,snippet',
+              type: 'video ',                //servono per far cercare soltanto video musicali
+              videoCategoryId: '10',
+              maxResults:'1'
+            });
+            request.execute(function(response){
+           // alert("pippo");
+            console.log("response: ");
+            console.log(response);
+            vid[j]=response.items[0];
+            console.log("vid");
+            console.log(vid[j]);
+            dim=vid[20].length;
+            //resArtSim[j]=response;
+            /*dim=songs.items.length;
+            for (var i = 0; i < dim; i++) {
+                  vid[i]=resSearch.items[i];*/
+                  stampa(vid[20],dim,category,info)
+            });
+          }
+            //stampa(vid,dim,category,info);
+
+          console.log(vid);
+        }
+      
+      });
+      }
+      });
+    }
+  });
 
 
-          if(category== "GenreSimilarity"){
+  }
+if(category== "GenreSimilarity"){
 
             var currVid;
-    	var html="";
-    	var artist="";
-    	$.ajax({
-    		url: 'https://www.googleapis.com/youtube/v3/videos?key=' + 'AIzaSyCmxhjyAdTBxuEOG_etapCgLYwIBpSmdbQ' + '&id=' + currentVideo + '&part=snippet',
+      var html="";
+      var artist="";
+      $.ajax({
+        url: 'https://www.googleapis.com/youtube/v3/videos?key=' + 'AIzaSyCmxhjyAdTBxuEOG_etapCgLYwIBpSmdbQ' + '&id=' + currentVideo + '&part=snippet',
                     success: function(data){ currVid=data.items[0];},
 
                     complete: function(){
-    			title=currVid.snippet.title;
-    			console.log(title);
-    			title=title.split("-");
-    			console.log(title.length);
-    			if(title.length==1){
-    				console.log("if");
-    				title=title[0].split("|");
-    			}
+          title=currVid.snippet.title;
+          console.log(title);
+          title=title.split("-");
+          console.log(title.length);
+          if(title.length==1){
+            console.log("if");
+            title=title[0].split("|");
+          }
 
-    			if(title.length>1){
-    			console.log("bla");
-    			title[0]=title[0].trim();
-    			var titolo=title[0].split("(");}
-    			console.log("title[1]: "+title[1]);
+          if(title.length>1){
+          console.log("bla");
+          title[0]=title[0].trim();
+          var titolo=title[0].split("(");}
+          console.log("title[1]: "+title[1]);
 
-    			$.get("http://localhost:8000/GenreSimilarity?title="+title[1].trim(), function(data, status){
-    			var genere="";
+          $.get("http://localhost:8000/GenreSimilarity?title="+title[1].trim(), function(data, status){
+          var genere="";
 
 
-    			if(data.results.bindings.length>0){
-    			genere=data.results.bindings[0].genereNome;
+          if(data.results.bindings.length>0){
+          genere=data.results.bindings[0].genereNome;
           var songs="";
 
-    			$.get("http://localhost:8000/Genre?title="+genere, +artist, function(data, status){
+          $.get("http://localhost:8000/Genre?title="+genere, +artist, function(data, status){
 
-    				if(data.results.bindings[0].artName){
-    						artist=data.results.bindings[j].artName;
+            if(data.results.bindings[0].artName){
+                artist=data.results.bindings[j].artName;
                 $.get("http://localhost:8000/GenreArtist?title="+title[1].trim(), function(data, status){
 
                   if(data.results.bindings[0].genereNome){
@@ -557,15 +586,15 @@ var tag = document.createElement('script');
                       var request = gapi.client.youtube.search.list({
                         q:songs,
                         part: 'id',
-                        type: 'video',                //servono per far cercare soltanto video musicali
+                        type: 'video ,snippet',                //servono per far cercare soltanto video musicali
                         videoCategoryId: '10',
                         maxResults:'1'
                       });
                       request.execute(function(response){
-                      alert("pippo");
+                 //     alert("pippo");
                       console.log("response: ");
                       console.log(response);
-                      vid[j]=response.items[0].id.videoId;
+                      vid[j]=response.items[0];
                       //resArtSim[j]=response;
                       /*dim=songs.items.length;
                       for (var i = 0; i < dim; i++) {
@@ -576,28 +605,21 @@ var tag = document.createElement('script');
                     }
 
 
-    					});
+              });
               //
 
-    					$(".tabcontent#"+category).html(html);
-    					console.log(html);
+              $(".tabcontent#"+category).html(html);
+              console.log(html);
 
-    				stampa(vid,dim,category,info);
+            stampa(vid,dim,category,info);
           }
-    			});
-    		}
-    	});
+          });
+        }
+      });
     }
 });
 
-    }
-
-          if(category== "BandSimilarity"){
-
-          }
-
-          /*if((category!="popLocAss")&&(category!="popLocRel")&&(category!="popGlobAss")&&(category!="popGlobRel"))
-              stampa(vid,dim,category,info);*/
+}
         }
         function makeid() {
             var text = "";
@@ -619,15 +641,15 @@ var tag = document.createElement('script');
           history.replaceState(stateObj , currentVideo, "?id="+id);
           current_reason="undentified";
           caricaTab("Recent");
-
+          
         }
+        
 
-
-
-
+        
+         
         // inserita search luci
 
-        $(document).ready(function(){
+        $(document).ready(function(){   
           initHistory();
           $(window).on('popstate', function() {
             var id = history.state.id;
@@ -662,7 +684,7 @@ var tag = document.createElement('script');
                   maxResults: 50
             });
             request.execute(function(response){
-
+            
               var rnd=Math.floor(Math.random()*response.items.length);
               resRand=response;
               $('#random-button').click(caricaTab('Random'));
@@ -671,7 +693,7 @@ var tag = document.createElement('script');
             });
           });
 
-
+        
          $("#Fvitali-button").click(function(e){
             $.ajax({
 
@@ -683,8 +705,8 @@ var tag = document.createElement('script');
               error: function(data) {
                 alert("Caricamento impossibile");
               }
-            });
-          });
+            });    
+          });    
 
 
       });

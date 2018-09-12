@@ -351,7 +351,6 @@ app.get('/GenreSimilarity',(req,res)=>{
 										FILTER regex(?songName, "`+ title +`")
 									}`;
 									//prendere il titolo della canzone corrente
-
 			var Artist= `PREFIX dbo: <http://dbpedia.org/ontology/>
 											PREFIX foaf:<http://xmlns.com/foaf/0.1/>
 											SELECT  distinct ?artName  WHERE{
@@ -382,7 +381,6 @@ app.get('/GenreSimilarity',(req,res)=>{
 													FILTER regex(?genereNome, "`+ genere +`").
 													FILTER ( ?artistName != "`+ Artist+`")
 												}`;
-
 	var queryUrlSimilarityG = encodeURI( url+"?query="+queryGenre);
 	request.get(queryUrl, { json: true }, (err, res1, body) => {
 			if (err) { return console.log(err); }
@@ -506,7 +504,6 @@ app.get('/Band',(req,res)=>{
 app.get('/BandSimilarity',(req,res)=>{
 	var title=req.query.title;
 	var url = "http://dbpedia.org/sparql";
-
 var band=`PREFIX dbo: <http://dbpedia.org/ontology/>
 							SELECT  ?bandName WHERE{
 								?song a <http://dbpedia.org/ontology/MusicalWork>.
@@ -515,8 +512,6 @@ var band=`PREFIX dbo: <http://dbpedia.org/ontology/>
 								?band  <http://xmlns.com/foaf/0.1/name>  ?bandName.
 								FILTER regex(?songName, "`+title+`").
 								}`;
-
-
 var membriBand=` PREFIX dbo:<http://dbpedia.org/ontology/>
 								PREFIX dbp:<http://dbpedia.org/property/>
 								PREFIX foaf:<http://xmlns.com/foaf/0.1/>
@@ -533,7 +528,6 @@ var membriBand=` PREFIX dbo:<http://dbpedia.org/ontology/>
 									}
 									FILTER regex(?artName,"`+ band +`")
 								}`;
-
 for(var i=0; i<membriBand.length; i++){
 					var queryBand= `PREFIX dbo: <http://dbpedia.org/ontology/>
 								PREFIX foaf:<http://xmlns.com/foaf/0.1/>
@@ -561,7 +555,6 @@ for(var i=0; i<membriBand.length; i++){
 										FILTER ( str(?bandName) != "`+band+`")
 									}`;
 		}
-
 		var queryUrlSimilarityB = encodeURI( url+"?query="+queryBand);
 		request.get(queryUrl, { json: true }, (err, res1, body) => {
 				if (err) { return console.log(err); }
@@ -571,6 +564,5 @@ for(var i=0; i<membriBand.length; i++){
 						res.json(body);
 				}
 		});
-
 });*/
 app.listen(8000, ()=>console.log("Listening on 8000"));
