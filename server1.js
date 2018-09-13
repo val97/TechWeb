@@ -1,6 +1,6 @@
 var fs = require("fs");
 var http = require("http");
-var locpop = require ('./popularity0.5.js');
+var locpop = require ('./popularity0.6.js');
 var url = require("url");			//permette di caricare anche gli script del file html
 var mb = require('musicbrainz');
 const request = require('request');
@@ -20,6 +20,47 @@ app.get('/',(req,res)=>{
 app.get('/script1.js',(req,res)=>{
 	 script = fs.readFileSync("script1.js", "utf8");
         res.send(script);
+});
+app.get('/globpop',(req,res)=>{
+	var id = req.query.id;
+	var prom;
+	if(id==null){
+		prom=locpop.findApiAss();
+	}else{
+		prom=locpop.findApiRel(id);
+	}
+	prom.then(function(data){
+		var array=[];
+		var i;
+		var video;
+		var last_watched;
+		
+		var prom2=locpop.findOne(id,true);
+		prom2.then(function(vid){
+			if(vid!=null)
+				last_watched=vid[0].last_watched.toUTCString();
+			else
+				last_watched=null;
+			for(i=0;i<data.length;i++){
+				
+				var d=new Date(data[i].last_watched);
+				video={
+					videoId:data[i].to_id,
+					timesWatched:data[i].num,
+					prevalentReason:data[i].reason,
+					lastSelected:d.toUTCString()
+				};
+				array.push(video);
+			}
+			var myobj={
+				site:"http://site1830.tw.cs.unibo.it/",
+				recommender:id,
+				lastWatched:last_watched,
+				recommended:array
+			};
+			res.end(JSON.stringify(myobj));
+		});
+	});
 });
 
 app.get('/popularity',(req,res)=>{
