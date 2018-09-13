@@ -1,7 +1,7 @@
 var MongoClient = require('mongodb').MongoClient;
 var url_DB = "mongodb://localhost:27017/mydb";		//db statico (con nomi di collezioni prefissati)	
 var url = "mongodb://localhost:27017/";
-var debug=true;
+var debug=false;
 //var gruppi=["sfs","1829","1828"];
 var gruppi=["1829","1828","1838","1839"];
 var collection=["ass","rel","vid","vid_rel"];	//ass contiene gli elementi relativi alla popolarita' assoluta
@@ -20,9 +20,10 @@ var counter=0;			/////////////////////////////////////////////////////
 //findLocRel("globID");
 //findGlobAss();
 //findApiAss();
-findApiRel("8of3uhG1tCI");
+//findApiRel("8of3uhG1tCI");
 //findAll("ass");
 //updateAll();
+//findOne("8of3uhG1tCI");
 //find(20,null,true,"tot");
 
 exports.fixReasonName=fixReasonName;
@@ -34,10 +35,13 @@ exports.insertLocAss=insertLocAss;
 exports.insertLocRel=insertLocRel;
 exports.updateAll=updateAll;
 exports.findAll=findAll;
+exports.findOne=findOne;
 exports.findLocAss=findLocAss;
 exports.findGlobAss=findGlobAss;
 exports.findLocRel=findLocRel;
 exports.findGlobRel=findGlobRel;
+exports.findApiAss=findApiAss;
+exports.findApiRel=findApiRel;
 exports.isUpdating=isUpdating;
 
 
@@ -520,6 +524,34 @@ function findAll(collection){				//trova gli n video piu visualizzati
 				resolve(result);
 	    			db.close();
 			});
+		});
+	});
+	return prom;
+	
+}
+function findOne(vid_id,is_api){				//trova gli n video piu visualizzati
+	var prom=new Promise(function(resolve,reject){
+		MongoClient.connect(url, function(err, db) {
+			if (err) throw err;
+	  		var dbo = db.db("mydb");
+			if(vid_id!=null){
+				var query={to_id:vid_id};
+				if(is_api){
+					query.from="me",
+					query.reason="tot"
+				}
+			
+				dbo.collection("ass").find(query).toArray(function(err,result){
+					if (err) throw err;
+					if(debug) console.log("find:");
+		    			if(debug) console.log(result);
+					resolve(result);
+		    			db.close();
+				});
+			}else{
+				resolve(null);
+		    		db.close();
+			}
 		});
 	});
 	return prom;
