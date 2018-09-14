@@ -433,6 +433,252 @@ var tag = document.createElement('script');
   
               });
             }
+              if(category== "ArtistSimilarity"){
+                  var currVid;
+                  var html="";
+                  
+                  $.ajax({
+                      url: 'https://www.googleapis.com/youtube/v3/videos?key=' + 'AIzaSyCmxhjyAdTBxuEOG_etapCgLYwIBpSmdbQ' + '&id=' + currentVideo + '&part=snippet',
+                      success: function(data){ currVid=data.items[0];},
+
+                      complete: function(){
+
+                              title=currVid.snippet.title;
+
+                              title=title.split("-");
+                              //console.log(title);
+                              if(title.length==1){
+
+                                title=title[0].split("|");
+
+                              }if(title.length>1){
+
+                                artist=title[0].trim();
+                                title[0]=title[0].trim();
+                                var titolo=title[1].split("(");
+                                console.log("titolo" + titolo[0]);
+                              }
+                              $.get("http://localhost:8000/Artist?title="+titolo[0].trim(), function(data, status){
+
+                                    var artist="";
+                                    var album="";
+
+                                    console.log(data);
+
+                                    console.log("status: "+status);
+
+                                    if(data.results.bindings.length>0){
+                                      for(var k=0; k<data.results.bindings.length; k++){
+                                        artist=data.results.bindings[k].artName.value;
+                                        //var album=data.results.bindings[0].album;
+                                        //var date=data.results.bindings[0].date;
+
+
+                                        console.log("artist: "+artist);
+                                        $.get("http://localhost:8000/Song?artist="+artist, function(data, status){
+                                          //console.log("data:  "+data.results.bindings[0].albumName.value);
+                                          if(data.results.bindings.length>0){
+                                            album=data.results.bindings[0].albumName.value;
+                                            var date="";
+                                            date=data.results.bindings[0].date;
+                                            if(data.results.bindings[0].songName){
+
+                                              for(var j=0;j<recommender_size;j++){
+                                                var songs="";
+                                                songs=data.results.bindings[j].songName.value;
+                                                console.log("songs: ");
+                                                console.log(songs);
+                                                $.ajax({
+                                                  cache: false,
+                                                  data: {
+                                                    key:'AIzaSyCmxhjyAdTBxuEOG_etapCgLYwIBpSmdbQ',
+                                                    q:songs,
+                                                    part:'id,snippet',
+                                                    maxResults:1},
+                                                    dataType:'json',
+                                                    type:'GET',
+                                                    url:'https://www.googleapis.com/youtube/v3/search'
+                                                  })
+
+                                                  .done(function(data) {
+                                                    console.log(data.items[0]);
+
+                                                    html += "<div  class='card border-info mb-3' style='width: 16rem;display: inline-block;'>";
+                                                    html+=" <img class='card-img-top'  src ='https://img.youtube.com/vi/"+data.items[0].id.videoId+"/default.jpg' value='"+data.items[0].id.videoId+"' alt='Card image cap'>";
+                                                    html += "<div class='card-body'> <p class='card-text'><b>"+ data.items[0].snippet.title +"</b><br>"+data.items[0].snippet.channelTitle+"<br>"+ (data.items[0].snippet.publishedAt).slice(0,-14)+"</br><br>"+artist+"</br><br>"+album+"</br></p></div></div> ";
+
+                                                    //console.log(html);
+                                                    $(".tabcontent#"+category).html(html);
+                                                  });
+                                                }
+                                              }
+                                            }
+                                          });
+                                        }
+                                      }
+                                    });
+                                  }
+                                });
+                              }
+              
+              
+   if(category== "GenreSimilarity"){
+
+      var currVid;
+      var html="";
+      var artist="";
+      $.ajax({
+        url: 'https://www.googleapis.com/youtube/v3/videos?key=' + 'AIzaSyCmxhjyAdTBxuEOG_etapCgLYwIBpSmdbQ' + '&id=' + currentVideo + '&part=snippet',
+                    success: function(data){ currVid=data.items[0];},
+
+                    complete: function(){
+                          title=currVid.snippet.title;
+                          console.log(title);
+                          title=title.split("-");
+                          console.log(title.length);
+                          if(title.length==1){
+                            title=title[0].split("|");
+                          }
+
+                          if(title.length>1){
+
+                              title[0]=title[0].trim();
+                              var titolo=title[0].split("(");}
+                              console.log("title[1]: "+title[1]);
+
+                              $.get("http://localhost:8000/GenreSimilarity?title="+title[1].trim(), function(data, status){
+                                  var genere="";
+                                  if(data.results.bindings.length>0){
+                                      genere=data.results.bindings[0].genereNome.value;
+
+                                      console.log(genere);
+
+                                      $.get("http://localhost:8000/Artist?title="+title[1].trim(), function(data, status){
+                                          if(data.results.bindings.length>0){
+                                              for(var k=0; k<data.results.bindings.length; k++){
+                                                  artist=data.results.bindings[k].artName.value;
+                                                  console.log("artist:"+artist);
+                                                  $.get("http://localhost:8000/Genre?genere="+genere+"&artist"+artist, function(data, status){
+
+                                                          if(data.results.bindings[0].genereNome){
+                                                              for(var j=0;j<recommender_size;j++){
+                                                                  var songs="";
+                                                                  var gen="";
+                                                                  gen=data.results.bindings[0].genereNome.value;
+                                                                  songs=data.results.bindings[j].songName.value;
+                                                                  console.log("songs: ");
+                                                                  console.log(songs);
+                                                                  $.ajax({
+                                                                      cache: false,
+                                                                      data: {
+                                                                        key:'AIzaSyCmxhjyAdTBxuEOG_etapCgLYwIBpSmdbQ',
+                                                                        q:songs,
+                                                                        part:'id,snippet',
+                                                                        maxResults:1},
+                                                                        dataType:'json',
+                                                                        type:'GET',
+                                                                        url:'https://www.googleapis.com/youtube/v3/search'
+                                                                      })
+
+                                                                      .done(function(data) {
+                                                                          console.log(data.items[0]);
+
+                                                                          html += "<div  class='card border-info mb-3' style='width: 16rem;display: inline-block;'>";
+                                                                          html+=" <img class='card-img-top'  src ='https://img.youtube.com/vi/"+data.items[0].id.videoId+"/default.jpg' value='"+data.items[0].id.videoId+"' alt='Card image cap'>";
+                                                                          html += "<div class='card-body'> <p class='card-text'><b>"+ data.items[0].snippet.title +"</b><br>"+data.items[0].snippet.channelTitle+"<br>"+ (data.items[0].snippet.publishedAt).slice(0,-14)+"</br><br>"+gen+"</br></p></div></div> ";
+
+                                                                          //console.log(html);
+                                                                          $(".tabcontent#"+category).html(html);
+                                                                        });
+                                                                      }
+                                                                    }
+                                                                  });
+                                                                }
+                                                              }
+                                                            });
+                                                          }
+                                                        });
+                                                      }
+                                                    });
+                                                  }
+if (category=="BandSimilarity"){
+    var html="";
+    $.ajax({
+        url: 'https://www.googleapis.com/youtube/v3/videos?key=' + 'AIzaSyCmxhjyAdTBxuEOG_etapCgLYwIBpSmdbQ' + '&id=' + currentVideo + '&part=snippet',
+                success: function(data){ currVid=data.items[0];},
+
+                complete: function(){
+                    title=currVid.snippet.title;
+                    title=title.split("-");
+                    //console.log(title);
+                    if(title.length==1){
+                      title=title[0].split("|");
+                    }if(title.length>1){
+                        artist=title[0].trim();
+                        title[0]=title[0].trim();
+                        var titolo=title[1].split("(");
+                        console.log("titolo" + titolo[0]);
+
+                        $.get("http://localhost:8000/BandSimilarity?title="+titolo[0].trim(), function(data, status){
+
+                            var band="";
+                            if(data.results.bindings[0].bandName){
+                                band=data.results.bindings[0].bandName.value;
+                                console.log(data.results.bindings[0].bandName.value);
+                                $.get("http://localhost:8000/GenreMembri?band="+band, function(data, status){
+                                    var membri="";
+                                    console.log(data.results.bindings.length);
+                                    //  if(data.results.bindings[0]){
+                                    var k=0;
+                                    for(k=0 ; k<data.results.bindings.length ; k++){
+                                        membri=data.results.bindings[k].memberName.value;
+                                        console.log(membri);
+                                        console.log(band);
+                                        $.get("http://localhost:8000/Band?membriBand="+membri+"&band="+band, function(data, status){
+                                            var songs="";
+                                            var nomeBand="";
+                                            console.log(data.results.bindings.length);
+
+                                            if(data.results.bindings.length>0){
+                                                for(var j=0;j<data.results.bindings.length;j++){
+
+                                                    songs=data.results.bindings[j].songName.value;
+                                                    nomeBand=data.results.bindings[j].bandName.value;
+                                                    //console.log("songs: ");
+                                                    console.log(songs);
+                                                    $.ajax({
+                                                        cache: false,
+                                                        data: {
+                                                          key:'AIzaSyCmxhjyAdTBxuEOG_etapCgLYwIBpSmdbQ',
+                                                          q:songs,
+                                                          part:'id,snippet',
+                                                          maxResults:1},
+                                                          dataType:'json',
+                                                          type:'GET',
+                                                          url:'https://www.googleapis.com/youtube/v3/search'
+                                                        })
+
+                                                        .done(function(data) {
+                                                          console.log(data.items[0]);
+
+                                                          html += "<div  class='card border-info mb-3' style='width: 16rem;display: inline-block;'>";
+                                                          html+=" <img class='card-img-top'  src ='https://img.youtube.com/vi/"+data.items[0].id.videoId+"/default.jpg' value='"+data.items[0].id.videoId+"' alt='Card image cap'>";
+                                                          html += "<div class='card-body'> <p class='card-text'><b>"+ data.items[0].snippet.title +"</b><br>"+data.items[0].snippet.channelTitle+"<br>"+ (data.items[0].snippet.publishedAt).slice(0,-14)+"</br><br>"+membri+"</br><br>"+nomeBand+"</p></div></div> ";
+
+                                                          //console.log(html);
+                                                          $(".tabcontent#"+category).html(html);
+                                                        });
+                                                      }
+                                                    }
+                                                  });
+                                                }
+                                              });
+                                            }
+                                          });
+                                        }
+                                      }
+                                    });
+                                  }
         }
         function makeid() {
             var text = "";
