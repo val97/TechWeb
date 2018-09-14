@@ -215,5 +215,255 @@ request.get(queryUrl, { json: true }, (err, res1, body) => {
   
 });
 });
+
+//questa query ritorna l'artista della canzone dato il titolo
+app.get('/Artist',(req,res)=>{
+	var title=req.query.title;
+		var url = "http://dbpedia.org/sparql";
+		var Artist= `PREFIX dbo: <http://dbpedia.org/ontology/>
+								PREFIX foaf:<http://xmlns.com/foaf/0.1/>
+									SELECT  distinct ?artName  WHERE{
+										{
+												?artist a <http://dbpedia.org/ontology/MusicalArtist>.
+												?artist foaf:name ?artName.
+												?song a <http://dbpedia.org/ontology/MusicalWork>.
+												?song foaf:name ?songName.
+												?song dbo:artist ?artist.
+											}UNION
+											{
+												?artist a <http://dbpedia.org/ontology/MusicalArtist>.
+												?artist foaf:name ?artName.
+												?song a <http://dbpedia.org/ontology/MusicalWork>.
+												?song foaf:name ?songName.
+												?song dbo:musicalArtist ?artist.
+											}
+											filter (str(?songName)= "`+title+`")
+										}`;
+
+			console.log("artista: "+Artist);
+			var queryUrlSimilarityA = encodeURI( url+"?query="+Artist);
+			//console.log( queryUrlSimilarityA);
+			request.get(queryUrlSimilarityA, { json: true }, (err, res1,body) => {
+			  if (err) { return console.log(err); }
+			  //console.log(res1.statusCode);
+			 if(res1.statusCode){
+			  	console.log("body: ");
+					console.log(body);
+			  	res.json(body);
+			  }
+
+
+			});
+});
+
+//questa query ritorna la lista di tutte le canzoni di un'artista
+app.get('/Song',(req,res)=>{
+		var artist=req.query.artist;
+		console.log("song:"+artist);
+		var url = "http://dbpedia.org/sparql";
+		var queryArtist=`PREFIX dbo: <http://dbpedia.org/ontology/>
+											SELECT distinct ?songName ?albumName ?date WHERE {
+												?artist a <http://dbpedia.org/ontology/MusicalArtist>.
+												?artist <http://xmlns.com/foaf/0.1/name> ?artName.
+												?artist dbo:abstract ?abstract .
+												?song <http://dbpedia.org/ontology/artist> ?artist.
+												?song dbo:abstract ?Sabstract .
+												?song dbo:album ?album.
+												?song dbo:releaseDate ?date.
+												?song <http://xmlns.com/foaf/0.1/name> ?songName.
+												?album <http://xmlns.com/foaf/0.1/name> ?albumName.
+												filter regex(?artName,'`+ artist +`', 'i')
+												filter ( langMatches(lang(?abstract), 'it'))
+											}
+											ORDER BY ?album DESC(?date) `;
+		console.log("song:"+queryArtist);
+		var queryUrlSimilarityA = encodeURI( url+"?query="+ queryArtist);
+
+		request.get(queryUrlSimilarityA, { json: true }, (err, res1,body) => {
+			  	if (err) { return console.log(err); }
+			  	console.log(res1.statusCode);
+			 	if(res1.statusCode){
+			  		console.log(body);
+			  			res.json(body);
+			  }
+			});
+});
+
+//genere similarity
+//questa query restituisce il genere della canzone dato il titolo di essa
+app.get('/GenreSimilarity',(req,res)=>{
+		var title=req.query.title;
+		var url = "http://dbpedia.org/sparql";
+		var genere= `PREFIX dbo: <http://dbpedia.org/ontology/>
+										SELECT ?genereNome ?artName WHERE{
+											?song a <http://dbpedia.org/ontology/MusicalWork>.
+											?song <http://xmlns.com/foaf/0.1/name> ?songName.
+											?song dbo:genre ?genere.
+											?genere <http://xmlns.com/foaf/0.1/name> ?genereNome.
+											FILTER regex(?songName, "`+ title +`")
+										}`;
+			console.log("genere"+genere);
+			var queryUrlSimilarityG = encodeURI( url+"?query="+genere);
+			//console.log( queryUrlSimilarityA);
+			request.get(queryUrlSimilarityG, { json: true }, (err, res1,body) => {
+			  if (err) { return console.log(err); }
+			  //console.log(res1.statusCode);
+			 if(res1.statusCode){
+			  	console.log("body: ");
+				console.log(body);
+			  	res.json(body);
+			  }
+			});
+});
+
+//questa query ritorna la lista di canzoni in base al genere ma di artisti diversi dall'artista ritorna precedentemente
+app.get('/Genre',(req,res)=>{
+	//var title=req.query.title;
+
+
+	 var genere=req.query.genere;
+	var  artist=req.query.artist;
+	 console.log("artista:  "+artist);
+		var url = "http://dbpedia.org/sparql";
+		var queryGenre=`PREFIX dbo: <http://dbpedia.org/ontology/>
+												SELECT ?songName ?artistName ?genereNome WHERE{
+													?song a <http://dbpedia.org/ontology/MusicalWork>.
+													?song <http://xmlns.com/foaf/0.1/name> ?songName.
+													?song dbo:genre ?genere.
+													?genere <http://xmlns.com/foaf/0.1/name> ?genereNome.
+													?song dbo:artist ?artist.
+													?artist <http://xmlns.com/foaf/0.1/name> ?artistName.
+													FILTER regex(?genereNome, "`+ genere +`").
+													FILTER ( ?artistName != "`+ artist+`")
+												}`;
+			console.log("query genere"+queryGenre);
+			var queryUrlSimilarityG = encodeURI( url+"?query="+queryGenre);
+
+			request.get(queryUrlSimilarityG, { json: true }, (err, res1,body) => {
+			  if (err) { return console.log(err); }
+			 if(res1.statusCode){
+			  	console.log("body: ");
+				console.log(body);
+			  	res.json(body);
+			  }
+
+
+			});
+});
+
+//band similarity
+
+//questa query ritorna il nome della band che suona la canzone
+app.get('/BandSimilarity',(req,res)=>{
+	var title=req.query.title;
+		var url = "http://dbpedia.org/sparql";
+		var band=`PREFIX dbo: <http://dbpedia.org/ontology/>
+									SELECT  ?bandName WHERE{
+										?song a <http://dbpedia.org/ontology/MusicalWork>.
+										?song <http://xmlns.com/foaf/0.1/name> ?songName.
+										?song dbo:musicalBand ?band.
+										?band  <http://xmlns.com/foaf/0.1/name>  ?bandName.
+										FILTER regex(?songName, "`+title+`").
+										}`;
+
+			var queryUrlSimilarityB = encodeURI( url+"?query="+band);
+			console.log( band);
+			request.get(queryUrlSimilarityB, { json: true }, (err, res1,body) => {
+			  if (err) { return console.log(err); }
+			  //console.log(res1.statusCode);
+			 if(res1.statusCode){
+			  	console.log("body: ");
+				console.log(body);
+			  	res.json(body);
+			  }
+
+
+			});
+});
+
+
+//questa query ritorna i nomi dei membri della band
+app.get('/GenreMembri',(req,res)=>{
+	var band=req.query.band;
+		var url = "http://dbpedia.org/sparql";
+		var membriBand=` PREFIX dbo:<http://dbpedia.org/ontology/>
+										PREFIX dbp:<http://dbpedia.org/property/>
+										PREFIX foaf:<http://xmlns.com/foaf/0.1/>
+										SELECT distinct ?memberName WHERE{
+											{
+												?artist a dbo:Band.
+											}
+											UNION{
+												?artist a dbo:Band.
+												?artist foaf:name ?artName.
+												OPTIONAL{?artist dbo:bandMember ?member.}
+												OPTIONAL{?artist dbo:formerBandMember ?member.}
+												?member foaf:name ?memberName
+											}
+											FILTER regex(?artName,"`+ band +`")
+										}`;
+
+			var queryUrlSimilarityB = encodeURI( url+"?query="+membriBand);
+			console.log(membriBand);
+			request.get(queryUrlSimilarityB, { json: true }, (err, res1,body) => {
+			  if (err) { return console.log(err); }
+			 if(res1.statusCode){
+			  	console.log("body: ");
+				console.log(body);
+			  	res.json(body);
+			  }
+
+
+			});
+});
+
+//questa query ritorna la lista di tutte le canzoni dove un membro della band suona/canta ma in un'altra band
+app.get('/Band',(req,res)=>{
+	//var title=req.query.title;
+	var membriBand=req.query.membriBand;
+	console.log("membri"+ membriBand);
+	var band=req.query.band;
+	var url = "http://dbpedia.org/sparql";
+						var queryBand= `PREFIX dbo: <http://dbpedia.org/ontology/>
+									PREFIX foaf:<http://xmlns.com/foaf/0.1/>
+									SELECT  distinct ?songName ?bandName WHERE{
+										{
+												?artist a <http://dbpedia.org/ontology/MusicalArtist>.
+												?artist foaf:name ?artName.
+												?band foaf:name ?bandName.
+												?band dbo:formerBandMember ?artist.
+												?song a <http://dbpedia.org/ontology/MusicalWork>.
+												?song foaf:name ?songName.
+												?song dbo:musicalBand ?band.
+											}
+											UNION
+											{
+												?artist a <http://dbpedia.org/ontology/MusicalArtist>.
+												?artist foaf:name ?artName.
+												?band foaf:name ?bandName.
+												?band dbo:bandMember ?artist.
+												?song a <http://dbpedia.org/ontology/MusicalWork>.
+												?song foaf:name ?songName.
+												?song dbo:musicalBand ?band.
+											}
+											FILTER regex(?artName, "`+membriBand+`").
+											FILTER ( str(?bandName) != "`+band+`")
+										}`;
+
+
+			var queryUrlSimilarityB = encodeURI( url+"?query="+queryBand);
+			console.log(queryBand);
+			request.get(queryUrlSimilarityB, { json: true }, (err, res1,body) => {
+			  if (err) { return console.log(err); }
+			 if(res1.statusCode){
+			  	console.log("body: ");
+				console.log(body);
+			  	res.json(body);
+			  }
+
+
+			});
+});
+
 app.listen(8000, ()=>console.log("Listening on 8000"));
 
