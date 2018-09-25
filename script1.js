@@ -102,7 +102,25 @@ var tag = document.createElement('script');
         event.target.playVideo();
       }
 
+function  cutTitle(data){
+      var  title=data;
 
+        title=title.split("-");
+        //console.log(title);
+        if(title.length==1){
+
+          title=title[0].split("|");
+
+        }if(title.length>1){
+
+          artist=title[0].trim();
+          title[0]=title[0].trim();
+          var titolo=title[1].split("(");
+
+        }
+         // console.log("titolo"+titolo);
+         return(titolo);
+    }
       //prende titolo e nome dell'artista
          function getDbpediaInfo(){
           var currVid;
@@ -114,22 +132,24 @@ var tag = document.createElement('script');
                            success: function(data){ currVid=data.items[0];},
 
                            complete: function(){
+  var titolo;
+                              titolo=cutTitle(currVid.snippet.title);
 
-                            
-                              title=currVid.snippet.title;
-                            
+                            /*  title=currVid.snippet.title;
+
                               title=title.split("-");
                               //console.log(title);
                               if(title.length==1){
-                               
+
                                 title=title[0].split("|");
 
                               }if(title.length>1){
-                              
+
                                 artist=title[0].trim();
                                 title[0]=title[0].trim();
                                 var titolo=title[1].split("(")
                                // console.log("titolo"+titolo);
+                               */
                                 $.get("http://localhost:8000/abstract?artist="+artist+"&title="+titolo[0].trim(), function(data, status){
 
                                  if(data.results.bindings[0]){
@@ -295,20 +315,21 @@ var tag = document.createElement('script');
         //riempie i recommender
        function stampa(vid, dim,category,info){
          var html="";
-          for (var i = 0; i < dim; i++) {
-            if(info){
-                html += "<div  class='card border-info mb-3' style='width: 16rem;display: inline-block;'>";
-                html+=" <img class='card-img-top'  src ='https://img.youtube.com/vi/"+vid[i].id.videoId+"/default.jpg' value='"+vid[i].id.videoId+"' alt='Card image cap'>";
-                html += "<div class='card-body'> <p class='card-text'><b>"+ vid[i].snippet.title +"</b><br>"+vid[i].snippet.channelTitle+"<br>"+ (vid[i].snippet.publishedAt).slice(0,-14)+"</p></div></div> ";
+         for (var i = 0; i < dim; i++) {
+            if(vid[i] != "undefined"){
 
-            } else{
-                html += "<div  class='card border-info mb-3' style='width: 16rem; display: inline-block;'>";
-                html+=" <img class='card-img-top'  src ='https://img.youtube.com/vi/"+vid[i].id+"/default.jpg' value='"+vid[i].id+"' alt='Card image cap'>";
-                html += "<div class='card-body'> <p class='card-text'><b>"+ vid[i].snippet.title +"</b><br>"+vid[i].snippet.channelTitle+"<br>"+ (vid[i].snippet.publishedAt).slice(0,-14)+"</p></div></div> ";
+                if(info){
+                    html += "<div  class='card border-info mb-3' style='width: 16rem;display: inline-block;'>";
+                    html+=" <img class='card-img-top'  src ='https://img.youtube.com/vi/"+vid[i].id.videoId+"/default.jpg' value='"+vid[i].id.videoId+"' alt='Card image cap'>";
+                    html += "<div class='card-body'> <p class='card-text'><b>"+ vid[i].snippet.title +"</b><br>"+vid[i].snippet.channelTitle+"<br>"+ (vid[i].snippet.publishedAt).slice(0,-14)+"</p></div></div> ";
+                } else{
+
+                  html += "<div  class='card border-info mb-3' style='width: 16rem; display: inline-block;'>";
+                  html+=" <img class='card-img-top'  src ='https://img.youtube.com/vi/"+vid[i].id+"/default.jpg' value='"+vid[i].id+"' alt='Card image cap'>";
+                  html += "<div class='card-body'> <p class='card-text'><b>"+ vid[i].snippet.title +"</b><br>"+vid[i].snippet.channelTitle+"<br>"+ (vid[i].snippet.publishedAt).slice(0,-14)+"</p></div></div> ";
+
+              }
             }
-          
-           
-            
           }
           $(".tabcontent#"+category).html(html);
 
@@ -442,8 +463,9 @@ var tag = document.createElement('script');
                       success: function(data){ currVid=data.items[0];},
 
                       complete: function(){
-
-                              title=currVid.snippet.title;
+  var titolo;
+                        titolo=cutTitle(currVid.snippet.title);
+                            /*  title=currVid.snippet.title;
 
                               title=title.split("-");
                               //console.log(title);
@@ -457,7 +479,7 @@ var tag = document.createElement('script');
                                 title[0]=title[0].trim();
                                 var titolo=title[1].split("(");
                                 console.log("titolo" + titolo[0]);
-                              }
+                              }*/
                               $.get("http://localhost:8000/Artist?title="+titolo[0].trim(), function(data, status){
 
                                     var artist="";
@@ -532,7 +554,9 @@ var tag = document.createElement('script');
                     success: function(data){ currVid=data.items[0];},
 
                     complete: function(){
-                          title=currVid.snippet.title;
+                           var titolo;
+                      titolo=cutTitle(currVid.snippet.title);
+                        /*  title=currVid.snippet.title;
                           console.log(title);
                           title=title.split("-");
                           console.log(title.length);
@@ -545,7 +569,7 @@ var tag = document.createElement('script');
                               title[0]=title[0].trim();
                               var titolo=title[0].split("(");}
                               console.log("title[1]: "+title[1]);
-
+*/
                               $.get("http://localhost:8000/GenreSimilarity?title="+title[1].trim(), function(data, status){
                                   var genere="";
                                   if(data.results.bindings.length>0){
@@ -608,7 +632,9 @@ if (category=="BandSimilarity"){
                 success: function(data){ currVid=data.items[0];},
 
                 complete: function(){
-                    title=currVid.snippet.title;
+                     var titolo;
+                  titolo=cutTitle(currVid.snippet.title);
+                  /*  title=currVid.snippet.title;
                     title=title.split("-");
                     //console.log(title);
                     if(title.length==1){
@@ -618,7 +644,7 @@ if (category=="BandSimilarity"){
                         title[0]=title[0].trim();
                         var titolo=title[1].split("(");
                         console.log("titolo" + titolo[0]);
-
+*/
                         $.get("http://localhost:8000/BandSimilarity?title="+titolo[0].trim(), function(data, status){
 
                             var band="";
