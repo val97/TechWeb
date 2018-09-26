@@ -546,6 +546,8 @@ function  cutTitle(data){
                                     });
                                   }
                                 });
+                                 $(".tabcontent#"+category).html(html);
+          html="";
                               }
               
               
@@ -634,6 +636,8 @@ function  cutTitle(data){
                                                         });
                                                       }
                                                     });
+                                     $(".tabcontent#"+category).html(html);
+          html="";
                                                   }
 if (category=="BandSimilarity"){
     var html="";
@@ -719,6 +723,8 @@ if (category=="BandSimilarity"){
                                         }
                                       }
                                     });
+                                  $(".tabcontent#"+category).html(html);
+          html="";
                                   }
         }
         function makeid() {
