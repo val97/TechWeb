@@ -1,11 +1,11 @@
 var tag = document.createElement('script');
 
       tag.src = "https://www.youtube.com/iframe_api";
-      
+
       var firstScriptTag = document.getElementsByTagName('script')[0];
       firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
 
-      
+
       var recommender_size=20;    //dimensione tabella degli ultimi video visitati
       var currentVideo="8of3uhG1tCI";
       var lastVideo=null; //video precedente a quello attualmente visto
@@ -19,7 +19,7 @@ var tag = document.createElement('script');
 
       function savePopularity(){
         $.get("http://localhost:8000/popularity?to_id="+currentVideo+"&reason="+current_reason, function(data, status){
-          
+
         });
         var vid_recent=[recommender_size];
         var size=caricarecent(vid_recent);
@@ -39,7 +39,7 @@ var tag = document.createElement('script');
               var v=JSON.parse(data);
             for(var i = 0;i<v.length;i++)
               out[i]=v[i].to_id;
-            
+
               resolve(v.length);
           });
         });
@@ -59,13 +59,13 @@ var tag = document.createElement('script');
         if(time==10){ //se il viddeo e' stato visto
           salvarecent(currentVideo);
         savePopularity();
-    
+
         }
         if(time<10)
           clock=setTimeout(timedCount, 1000);
        }
 
-      
+
       function startClock(){
         if(!timerOn){
           timerOn=1;
@@ -97,7 +97,7 @@ var tag = document.createElement('script');
         });
       }
 
-      
+
       function onPlayerReady(event) {
         event.target.playVideo();
       }
@@ -136,15 +136,11 @@ function  cutTitle(data){
                               titolo=cutTitle(currVid.snippet.title);
 
                             /*  title=currVid.snippet.title;
-
                               title=title.split("-");
                               //console.log(title);
                               if(title.length==1){
-
                                 title=title[0].split("|");
-
                               }if(title.length>1){
-
                                 artist=title[0].trim();
                                 title[0]=title[0].trim();
                                 var titolo=title[1].split("(")
@@ -164,16 +160,16 @@ function  cutTitle(data){
                                       $('#wiki_container').html("no abs founded\n");
                                       $('#artist_container').html("no abs founded\n");
                                     }
-                                    
+
                                 });
                                 $.get("http://localhost:8000/info?artist="+artist+"&title="+titolo[0].trim(), function(data, status){
                                   console.log("risposta: ");
-                                   
+
                                    if(data.results.bindings[0]){
                                     var info=data.results.bindings[0];
                                      if(info.album.value)
                                         $('#info_container').append("<a href= "+info.album.value+">album:" +info.album.value+"</a><br>");
-                                     if(info.artName.value) 
+                                     if(info.artName.value)
                                         $('#info_container').append("artista" +info.artName.value+"<br>");
                                     if(info.relDate.value)
                                         $('#info_container').append("relDate" +info.relDate.value+"<br>");
@@ -183,11 +179,11 @@ function  cutTitle(data){
                                 });
 
                             }
-                         }
+
            });
          }
 
-     
+
       var done = false;
       function onPlayerStateChange(event) {
        if(event.data == YT.PlayerState.PLAYING){
@@ -204,13 +200,13 @@ function  cutTitle(data){
           });
           request.execute(function(response){
             var i;
-            var html="";  
+            var html="";
               for(i=0; i<response.items.length && i<20   ; i++){
                   html+="<img width='28' heigth='28' src="+JSON.stringify(response.items[i].snippet.topLevelComment.snippet.authorProfileImageUrl)+"> <b> "+ JSON.stringify(response.items[i].snippet.topLevelComment.snippet.authorDisplayName).slice(1,-1) +" </b> <br> "+ JSON.stringify(response.items[i].snippet.topLevelComment.snippet.textOriginal)+"<hr>";
                   $('#comment_container').html(html);
               }
           });
-      
+
         //DESCRIZIONE E TITOLO
           var request1 = gapi.client.youtube.videos.list({
             'method': 'get',
@@ -226,12 +222,12 @@ function  cutTitle(data){
             $('#description_container').html(desc);
             $('#title_container').html(title);
           });
-        
+
        }
         if(event.data == YT.PlayerState.PAUSED)
           stopClock();
       }
-      
+
 
 
 
@@ -257,7 +253,7 @@ function  cutTitle(data){
             history.pushState(stateObj , data, "?id="+data);
             caricaTab("Recent");
 
-           
+
         }
   function historyBack(id){
             newClock();
@@ -276,9 +272,9 @@ function  cutTitle(data){
           }
 
           if(!exist){
-                var key=localStorage.getItem("counter");  //counter=valore della prossima chiave libera 
+                var key=localStorage.getItem("counter");  //counter=valore della prossima chiave libera
                 if (!key)    //se non esiste già
-                  key=0;  
+                  key=0;
                 localStorage.setItem(key, ID);
                 key++;
                 key=key%recommender_size;
@@ -305,12 +301,12 @@ function  cutTitle(data){
             success: function(data) {
 
               loadCatalog(data);
-             
+
             },
             error: function(data) {
               alert("Caricamento impossibile");
             }
-          });       
+          });
         }
         //riempie i recommender
        function stampa(vid, dim,category,info){
@@ -337,7 +333,7 @@ function  cutTitle(data){
                 caricavideo($(this).attr("value"));
           });
         }
-       
+
         var resSearch="";
         var resRand="";
         var Fvit="";
@@ -357,7 +353,7 @@ function  cutTitle(data){
             }
             //serve per inserire le immagini nel tab
             document.getElementById(category).style.display = "block";
-           
+
             var dim=recommender_size;
             var vid=[recommender_size];
             var info=true;
@@ -385,7 +381,7 @@ function  cutTitle(data){
               var j=0;
 
               takeInfoById(j);
-                   
+
               }
             if((category=="popLocAss")||(category=="popLocRel")||(category=="popGlobAss")||(category=="popGlobRel")){
               info=false
@@ -394,23 +390,23 @@ function  cutTitle(data){
               dim=d;
                 var j=0;
                 takeInfoById(j);
-        });      
+        });
             }
-            
+
             if (category=="search") {
               //controllo se sto cercando per id, se vero lancio direttamente il video legato all' id
-              if(resSearch.items[0].id.videoId==$('#query').val()){ 
+              if(resSearch.items[0].id.videoId==$('#query').val()){
                   dim=0;
                   caricavideo(resSearch.items[0].id.videoId);
               }
               //visualizzo la lista dei video cercati
-              else{     
+              else{
                   dim=resSearch.items.length;
                   for (var i = 0; i < dim; i++) {
                       vid[i]=resSearch.items[i];
                   }
                    stampa(vid,dim,category,info);
-  
+
               }
             }
             if(category=="Fvitali"){
@@ -418,22 +414,22 @@ function  cutTitle(data){
               for (var i = 0; i <dim; i++) {
                 vid[i]=Fvit.recommended[i].videoID;
 
-              } 
+              }
               info =false;
               var j=0;
                   takeInfoById(j);
             }
 
-           
+
             if (category=="Random") {
               dim=20;
               for (var i = 0; i < 20; i++) {
                   vid[i]=resRand.items[i];
               }
                stampa(vid,dim,category,info)
-  
+
             }
-         
+
           if(category =="Related"){
               var request_related = gapi.client.request({
               'method': 'get',
@@ -451,13 +447,13 @@ function  cutTitle(data){
                   vid[i]=resRel.items[i];
                 }
                 stampa(vid,dim,category,info)
-  
+
               });
             }
               if(category== "ArtistSimilarity"){
                   var currVid;
                   var html="";
-                  
+
                   $.ajax({
                       url: 'https://www.googleapis.com/youtube/v3/videos?key=' + 'AIzaSyCmxhjyAdTBxuEOG_etapCgLYwIBpSmdbQ' + '&id=' + currentVideo + '&part=snippet',
                       success: function(data){ currVid=data.items[0];},
@@ -466,15 +462,11 @@ function  cutTitle(data){
   var titolo;
                         titolo=cutTitle(currVid.snippet.title);
                             /*  title=currVid.snippet.title;
-
                               title=title.split("-");
                               //console.log(title);
                               if(title.length==1){
-
                                 title=title[0].split("|");
-
                               }if(title.length>1){
-
                                 artist=title[0].trim();
                                 title[0]=title[0].trim();
                                 var titolo=title[1].split("(");
@@ -536,9 +528,9 @@ function  cutTitle(data){
                                               }
                                             }
                                               else {
-                                        
+
                                         $('#ArtistSimilarity').html('<h1>Sorry</h1><br><h3>Not found!</h3>');
-                                     
+
                                       }
                                           });
                                         }
@@ -549,8 +541,8 @@ function  cutTitle(data){
                                  $(".tabcontent#"+category).html(html);
           html="";
                               }
-              
-              
+
+
    if(category== "GenreSimilarity"){
 
       var currVid;
@@ -570,21 +562,19 @@ function  cutTitle(data){
                           if(title.length==1){
                             title=title[0].split("|");
                           }
-
                           if(title.length>1){
-
                               title[0]=title[0].trim();
                               var titolo=title[0].split("(");}
                               console.log("title[1]: "+title[1]);
 */
-                              $.get("http://localhost:8000/GenreSimilarity?title="+title[1].trim(), function(data, status){
+                              $.get("http://localhost:8000/GenreSimilarity?title="+titolo[0].trim(), function(data, status){
                                   var genere="";
                                   if(data.results.bindings.length>0){
                                       genere=data.results.bindings[0].genereNome.value;
 
                                       console.log(genere);
 
-                                      $.get("http://localhost:8000/Artist?title="+title[1].trim(), function(data, status){
+                                      $.get("http://localhost:8000/Artist?title="+titolo[0].trim(), function(data, status){
                                           if(data.results.bindings.length>0){
                                               for(var k=0; k<data.results.bindings.length; k++){
                                                   artist=data.results.bindings[k].artName.value;
@@ -629,16 +619,16 @@ function  cutTitle(data){
                                                             });
                                                           }
                                     else {
-                                        
+
                                         $('#GenreSimilarity').html('<h1>Sorry</h1><br><h3>Not found!</h3>');
-                                     
+
                                       }
-                                                        });
-                                                      }
-                                                    });
+                              });
+                          }
+                  });
                                      $(".tabcontent#"+category).html(html);
-          html="";
-                                                  }
+                                      html="";
+      }
 if (category=="BandSimilarity"){
     var html="";
     $.ajax({
@@ -715,16 +705,16 @@ if (category=="BandSimilarity"){
                                               });
                                             }
                               else {
-                                        
+
                                         $('#BandSimilarity').html('<h1>Sorry</h1><br><h3>Not found!</h3>');
-                                     
+
                                       }
                                           });
                                         }
-                                      }
+
                                     });
                                   $(".tabcontent#"+category).html(html);
-          html="";
+                                  html="";
                                   }
         }
         function makeid() {
@@ -747,15 +737,15 @@ if (category=="BandSimilarity"){
           history.replaceState(stateObj , currentVideo, "?id="+id);
           current_reason="undentified";
           caricaTab("Recent");
-          
-        }
-        
 
-        
-         
+        }
+
+
+
+
         // inserita search luci
 
-        $(document).ready(function(){   
+        $(document).ready(function(){
           initHistory();
           $(window).on('popstate', function() {
             var id = history.state.id;
@@ -790,7 +780,7 @@ if (category=="BandSimilarity"){
                   maxResults: 50
             });
             request.execute(function(response){
-            
+
               var rnd=Math.floor(Math.random()*response.items.length);
               resRand=response;
               $('#random-button').click(caricaTab('Random'));
@@ -799,7 +789,7 @@ if (category=="BandSimilarity"){
             });
           });
 
-        
+
          $("#Fvitali-button").click(function(e){
             $.ajax({
 
@@ -811,8 +801,8 @@ if (category=="BandSimilarity"){
               error: function(data) {
                 alert("Caricamento impossibile");
               }
-            });    
-          });    
+            });
+          });
 
 
       });
