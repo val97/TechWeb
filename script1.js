@@ -535,6 +535,11 @@ function  cutTitle(data){
                                                 }
                                               }
                                             }
+                                              else {
+                                        
+                                        $('#ArtistSimilarity').html('<h1>Sorry</h1><br><h3>Not found!</h3>');
+                                     
+                                      }
                                           });
                                         }
                                       }
@@ -621,6 +626,11 @@ function  cutTitle(data){
                                                               }
                                                             });
                                                           }
+                                    else {
+                                        
+                                        $('#GenreSimilarity').html('<h1>Sorry</h1><br><h3>Not found!</h3>');
+                                     
+                                      }
                                                         });
                                                       }
                                                     });
@@ -700,6 +710,11 @@ if (category=="BandSimilarity"){
                                                 }
                                               });
                                             }
+                              else {
+                                        
+                                        $('#BandSimilarity').html('<h1>Sorry</h1><br><h3>Not found!</h3>');
+                                     
+                                      }
                                           });
                                         }
                                       }
