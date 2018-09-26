@@ -523,6 +523,9 @@ function  cutTitle(data){
 
                                                     //console.log(html);
                                                     $(".tabcontent#"+category).html(html);
+                                                    $('img').click(function(){
+                                                          caricavideo($(this).attr("value"));
+                                                    });
                                                   });
                                                 }
                                               }
@@ -610,6 +613,9 @@ function  cutTitle(data){
 
                                                                           //console.log(html);
                                                                           $(".tabcontent#"+category).html(html);
+                                                                          $('img').click(function(){
+                                                                                caricavideo($(this).attr("value"));
+                                                                          });
                                                                         });
                                                                       }
                                                                     }
@@ -697,6 +703,9 @@ if (category=="BandSimilarity"){
 
                                                           //console.log(html);
                                                           $(".tabcontent#"+category).html(html);
+                                                          $('img').click(function(){
+                                                                caricavideo($(this).attr("value"));
+                                                          });
                                                         });
                                                       }
                                                     }
@@ -810,3 +819,4 @@ if (category=="BandSimilarity"){
           gapi.client.setApiKey("AIzaSyCmxhjyAdTBxuEOG_etapCgLYwIBpSmdbQ");
           gapi.client.load("youtube","v3",function(){ });
 }
+
