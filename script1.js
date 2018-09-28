@@ -114,12 +114,16 @@ function  cutTitle(data){
         }if(title.length>1){
 
           artist=title[0].trim();
-          title[0]=title[0].trim();
-          var titolo=title[1].split("(");
-
+           title[1]=title[1].split("(");
+           //if(title[1].length>=2)
+           	title[1]=title[1].shift();
+           console.log(title);
         }
          // console.log("titolo"+titolo);
-         return(titolo);
+         return(title);
+
+         //ritorno un'array dove il primo elemento è il nome dell'artista e il secondo è il titolo della canzone. 
+         //voi quando prendete l'oggetto ritornato all'interno della funzione vi dovete prendere oggetto[1].
     }
       //prende titolo e nome dell'artista
          function getDbpediaInfo(){
@@ -819,4 +823,3 @@ if (category=="BandSimilarity"){
           gapi.client.setApiKey("AIzaSyCmxhjyAdTBxuEOG_etapCgLYwIBpSmdbQ");
           gapi.client.load("youtube","v3",function(){ });
 }
-
