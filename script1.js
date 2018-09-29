@@ -238,11 +238,13 @@ function  cutTitle(data){
       //viene riempita la lista delle canzoni iniziali
       function loadCatalog(data){
           for (var i = 0; i < data.length; i++) {
-             main += "<div  class='card border-info mb-3' style='width: 16rem;height: 20rem; display: inline-block;'>";
+                
+                $("#main").append("<button data-dismiss='modal'  onclick='caricavideo("+JSON.stringify(data[i].videoID)+")'>"+"<div  class='card border-info mb-3' style='border:1px;width: 11rem;height: 7rem; display: inline-block;'><img class='card-img-top'  src ='https://img.youtube.com/vi/"+(JSON.stringify(data[i].videoID)).slice(1,-1)+"/default.jpg' value='"+ data[i].videoID +"' alt='Card image cap'><div class='card-body'> <p class='card-text'><b>"+ data[i].title +"</b><br>"+data[i].category+"<br>"+data[i].artist+"</p></div></div>");
+            /* main += "<div  class='card border-info mb-3' style='width: 16rem;height: 20rem; display: inline-block;'>";
             main +=" <img class='card-img-top'  src ='https://img.youtube.com/vi/"+(JSON.stringify(data[i].videoID)).slice(1,-1)+"/default.jpg' value='"+JSON.stringify(data[i].videoID)+"' alt='Card image cap'>";
              main += "<div class='card-body'> <p class='card-text'><b>"+ data[i].title +"</b><br>"+data[i].category+"<br>"+ data[i].artist+"</p></div></div> ";
-          }
-          $(".container-fluid").html(main);
+         */ }
+         // $(".container-fluid").html(main);
         }
 
         function caricavideo(data){
