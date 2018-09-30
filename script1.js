@@ -1,10 +1,9 @@
-var tag = document.createElement('script');
+		var tag = document.createElement('script');
 
       tag.src = "https://www.youtube.com/iframe_api";
-
+ 
       var firstScriptTag = document.getElementsByTagName('script')[0];
       firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
-
 
       var recommender_size=20;    //dimensione tabella degli ultimi video visitati
       var currentVideo="8of3uhG1tCI";
@@ -18,7 +17,7 @@ var tag = document.createElement('script');
 
 
       function savePopularity(){
-        $.get("http://localhost:8000/popularity?to_id="+currentVideo+"&reason="+current_reason, function(data, status){
+        $.get("http://site1830.tw.cs.unibo.it/popularity?to_id="+currentVideo+"&reason="+current_reason, function(data, status){
 
         });
         var vid_recent=[recommender_size];
@@ -27,32 +26,34 @@ var tag = document.createElement('script');
         if(lastVideo!=currentVideo)
           for(var i=0;i<size;i++){
             if(lastVideo==vid_recent[i]){
-              $.get("http://localhost:8000/popularity?from_id="+lastVideo+"&to_id="+currentVideo+"&reason="+current_reason, function(data, status){
+              $.get("http://site1830.tw.cs.unibo.it/popularity?from_id="+lastVideo+"&to_id="+currentVideo+"&reason="+current_reason, function(data, status){
                     //alert("last video: " + lastVideo + "\this video: " + currentVideo);
               });
             }
-          }
+    }
       }
       function caricaPopularity(ask,out){
-        var prom=new Promise(function(resolve,reject){
-          $.get("http://localhost:8000/popularity?from_id="+currentVideo+"&ask="+ask, function(data, status){
-              var v=JSON.parse(data);
-            for(var i = 0;i<v.length;i++)
+        alert("pippo");
+	var prom=new Promise(function(resolve,reject){
+          $.get("http://site1830.tw.cs.unibo.it/popularity?from_id="+currentVideo+"&ask="+ask, function(data, status){
+              /*var v=JSON.parse(data);
+              for(var i = 0;i<v.length;i++)
               out[i]=v[i].to_id;
-
-              resolve(v.length);
+		*/alert("carica popularity");
+		alert(data); resolve(6);
+              //resolve(v.length);
           });
         });
         return prom;
       }
       function saveReason(category){
-        var out="undefined";
+	var out="undefined";
         if((category=="popLocAss")||(category=="popLocRel")){
           out="LocalPopularity";
         }else if((category=="popGlobAss")||(category=="popGlobRel")){
           out="GlobalPopularity";
-        }else out=category;
-       last_reason=out;
+        }else out=category;	
+ 	 last_reason=out;
       }
       function timedCount(){
         time=time+1;
@@ -84,7 +85,7 @@ var tag = document.createElement('script');
       }
       //inizializzazione player
       var player;
-      function onYouTubeIframeAPIReady() {
+      var	onYouTubeIframeAPIReady =      function onYouTubeIframeAPIReady() {
         player = new YT.Player('player', {
           height: '390',
           width: '640',
@@ -97,13 +98,14 @@ var tag = document.createElement('script');
         });
       }
 
-
+      
       function onPlayerReady(event) {
         event.target.playVideo();
       }
+	
 
-function  cutTitle(data){
-      var  title=data;
+      function  cutTitle(data){
+      	var  title=data;
 
         title=title.split("-");
         //console.log(title);
@@ -113,10 +115,11 @@ function  cutTitle(data){
 
         }if(title.length>1){
 
-          artist=title[0].trim();
+           title[0]=title[0].trim();
            title[1]=title[1].split("(");
            //if(title[1].length>=2)
            	title[1]=title[1].shift();
+			title[1]=title[1].trim();
            console.log(title);
         }
          // console.log("titolo"+titolo);
@@ -124,9 +127,12 @@ function  cutTitle(data){
 
          //ritorno un'array dove il primo elemento è il nome dell'artista e il secondo è il titolo della canzone. 
          //voi quando prendete l'oggetto ritornato all'interno della funzione vi dovete prendere oggetto[1].
-    }
+}
+
       //prende titolo e nome dell'artista
-         function getDbpediaInfo(){
+ 
+
+function getDbpediaInfo(){
           var currVid;
           var artist="";
           var title="";
@@ -136,24 +142,12 @@ function  cutTitle(data){
                            success: function(data){ currVid=data.items[0];},
 
                            complete: function(){
-  var titolo;
-                              titolo=cutTitle(currVid.snippet.title);
-
-                            /*  title=currVid.snippet.title;
-                              title=title.split("-");
-                              //console.log(title);
-                              if(title.length==1){
-                                title=title[0].split("|");
-                              }if(title.length>1){
-                                artist=title[0].trim();
-                                title[0]=title[0].trim();
-                                var titolo=title[1].split("(")
-                               // console.log("titolo"+titolo);
-                               */
-                                $.get("http://localhost:8000/abstract?artist="+artist+"&title="+titolo[0].trim(), function(data, status){
+                                var titolo=cutTitle(currVid.snippet.title);
+                                if(titolo.length==2){
+                                $.get("http://localhost:8000/abstract?artist="+titolo[0]+"&title="+titolo[1].trim(), function(data, status){
 
                                  if(data.results.bindings[0]){
-                                    var wiki=data.results.bindings[0];
+                                    var wiki=data.results.bindings[0].Sabstract;
                                     var artist=data.results.bindings[0].abstract;
                                     if(data.results.bindings[0].Sabstract){
                                       $('#wiki_container').html(wiki.value);
@@ -164,30 +158,37 @@ function  cutTitle(data){
                                       $('#wiki_container').html("no abs founded\n");
                                       $('#artist_container').html("no abs founded\n");
                                     }
-
+                                    
                                 });
-                                $.get("http://localhost:8000/info?artist="+artist+"&title="+titolo[0].trim(), function(data, status){
+                                $.get("http://localhost:8000/info?artist="+titolo[0]+"&title="+titolo[1].trim(), function(data, status){
                                   console.log("risposta: ");
-
-                                   if(data.results.bindings[0]){
+                                   
+                                    if(data.results.bindings[0]){
                                     var info=data.results.bindings[0];
-                                     if(info.album.value)
-                                        $('#info_container').append("<a href= "+info.album.value+">album:" +info.album.value+"</a><br>");
-                                     if(info.artName.value)
-                                        $('#info_container').append("artista" +info.artName.value+"<br>");
-                                    if(info.relDate.value)
-                                        $('#info_container').append("relDate" +info.relDate.value+"<br>");
-                                      if(info.wik.value)
-                                        $('#info_container').append("wiki" +info.wik.value+"<br>");
-                                }
+                                    console.log(info);
+				    				if(info.album)
+                                        $('#info_container').append("album: <a href= "+info.album.value+">" +info.album.value+"</a><br>");
+                                    if(info.artName) 
+                                        $('#info_container').append("artista: " +info.artName.value+"<br>");
+                                    if(info.relDate)
+                                        $('#info_container').append("relDate: " +info.relDate.value+"<br>");
+                                    if(info.genre)
+										$('#info_container').append( "genre: <a href="+info.genre.value+">"+info.genre.value+"</a><br>");  
+				    				if(info.wik.value)
+                                        $('#info_container').append("wiki: " +info.wik.value+"<br>");
+                                }else
+				 					 $('#info_container').append("no info founded");
                                 });
+                              }else{
+				 					 $('#info_container').append("no info founded");
+				 					 $('#wiki_container').html("no abs founded\n");
+                                      $('#artist_container').html("no abs founded\n");
+                                  }
 
-                            }
 
+                               }
            });
-         }
-
-
+         }  
       var done = false;
       function onPlayerStateChange(event) {
        if(event.data == YT.PlayerState.PLAYING){
@@ -204,13 +205,13 @@ function  cutTitle(data){
           });
           request.execute(function(response){
             var i;
-            var html="";
+            var html="";  
               for(i=0; i<response.items.length && i<20   ; i++){
                   html+="<img width='28' heigth='28' src="+JSON.stringify(response.items[i].snippet.topLevelComment.snippet.authorProfileImageUrl)+"> <b> "+ JSON.stringify(response.items[i].snippet.topLevelComment.snippet.authorDisplayName).slice(1,-1) +" </b> <br> "+ JSON.stringify(response.items[i].snippet.topLevelComment.snippet.textOriginal)+"<hr>";
                   $('#comment_container').html(html);
               }
           });
-
+      
         //DESCRIZIONE E TITOLO
           var request1 = gapi.client.youtube.videos.list({
             'method': 'get',
@@ -223,15 +224,16 @@ function  cutTitle(data){
             var desc="";
             title +="<b><h2>"+JSON.stringify(response.items[0].snippet.title)+"</h2></b>";
             desc += "<p>"+JSON.stringify(response.items[0].snippet.description)+"</p>";
+            desc.replace("\n","<br>");
             $('#description_container').html(desc);
             $('#title_container').html(title);
           });
-
+        
        }
         if(event.data == YT.PlayerState.PAUSED)
           stopClock();
       }
-
+      
 
 
 
@@ -239,31 +241,35 @@ function  cutTitle(data){
       function loadCatalog(data){
           for (var i = 0; i < data.length; i++) {
                 
-                $("#main").append("<button data-dismiss='modal'  onclick='caricavideo("+JSON.stringify(data[i].videoID)+")'>"+"<div  class='card border-info mb-3' style='border:1px;width: 11rem;height: 7rem; display: inline-block;'><img class='card-img-top'  src ='https://img.youtube.com/vi/"+(JSON.stringify(data[i].videoID)).slice(1,-1)+"/default.jpg' value='"+ data[i].videoID +"' alt='Card image cap'><div class='card-body'> <p class='card-text'><b>"+ data[i].title +"</b><br>"+data[i].category+"<br>"+data[i].artist+"</p></div></div>");
+                $("#catalogo").append("<button data-dismiss='modal'  onclick='caricavideo("+JSON.stringify(data[i].videoID)+")'>"+"<div  class='card border-info mb-3' style='border:1px;width: 11rem;height: 7rem; display: inline-block; '><img class='card-img-top' src ='https://img.youtube.com/vi/"+(JSON.stringify(data[i].videoID)).slice(1,-1)+"/default.jpg' value='"+ data[i].videoID +"' alt='Card image cap'><div class='card-body'  style=' overflow: hidden; text-overflow=ellipsis'> <p class='card-text' ><b>"+ data[i].title +"</b><br>"+data[i].category+"<br>"+data[i].artist+"</p></div></div>");
             /* main += "<div  class='card border-info mb-3' style='width: 16rem;height: 20rem; display: inline-block;'>";
             main +=" <img class='card-img-top'  src ='https://img.youtube.com/vi/"+(JSON.stringify(data[i].videoID)).slice(1,-1)+"/default.jpg' value='"+JSON.stringify(data[i].videoID)+"' alt='Card image cap'>";
              main += "<div class='card-body'> <p class='card-text'><b>"+ data[i].title +"</b><br>"+data[i].category+"<br>"+ data[i].artist+"</p></div></div> ";
          */ }
+
          // $(".container-fluid").html(main);
-        }
+}
 
         function caricavideo(data){
             newClock();
-           lastVideo=currentVideo;
+      lastVideo=currentVideo;
             currentVideo=data;
+            document.getElementById("lista").click();
             player.loadVideoById(data, 0, "large");  //"0" secondi di inizio del video
+
             current_reason=last_reason;
              $('#wiki_container').html(" ");
             $('#artist_container').html(" ");
+		$('#info_container').html(" ");
             var stateObj = {id:data};
             history.pushState(stateObj , data, "?id="+data);
             caricaTab("Recent");
 
-
+           
         }
   function historyBack(id){
             newClock();
-            lastVideo=null;
+      lastVideo=null;
             currentVideo=id;
             player.loadVideoById(id, 0, "large");  //"0" secondi di inizio del video
         }
@@ -278,9 +284,9 @@ function  cutTitle(data){
           }
 
           if(!exist){
-                var key=localStorage.getItem("counter");  //counter=valore della prossima chiave libera
+                var key=localStorage.getItem("counter");  //counter=valore della prossima chiave libera 
                 if (!key)    //se non esiste già
-                  key=0;
+                  key=0;  
                 localStorage.setItem(key, ID);
                 key++;
                 key=key%recommender_size;
@@ -307,31 +313,34 @@ function  cutTitle(data){
             success: function(data) {
 
               loadCatalog(data);
-
+             
             },
             error: function(data) {
               alert("Caricamento impossibile");
             }
-          });
+          });       
         }
         //riempie i recommender
        function stampa(vid, dim,category,info){
          var html="";
-         for (var i = 0; i < dim; i++) {
-            if(vid[i] != "undefined"){
-
-                if(info){
-                    html += "<div  class='card border-info mb-3' style='width: 16rem;display: inline-block;'>";
-                    html+=" <img class='card-img-top'  src ='https://img.youtube.com/vi/"+vid[i].id.videoId+"/default.jpg' value='"+vid[i].id.videoId+"' alt='Card image cap'>";
-                    html += "<div class='card-body'> <p class='card-text'><b>"+ vid[i].snippet.title +"</b><br>"+vid[i].snippet.channelTitle+"<br>"+ (vid[i].snippet.publishedAt).slice(0,-14)+"</p></div></div> ";
-                } else{
-
-                  html += "<div  class='card border-info mb-3' style='width: 16rem; display: inline-block;'>";
-                  html+=" <img class='card-img-top'  src ='https://img.youtube.com/vi/"+vid[i].id+"/default.jpg' value='"+vid[i].id+"' alt='Card image cap'>";
-                  html += "<div class='card-body'> <p class='card-text'><b>"+ vid[i].snippet.title +"</b><br>"+vid[i].snippet.channelTitle+"<br>"+ (vid[i].snippet.publishedAt).slice(0,-14)+"</p></div></div> ";
-
-              }
+          for (var i = 0; i < dim; i++) {
+            if(info){
+                html += "<div  class='card border-info mb-3' style='width: 16rem; border:none; display: inline-block; padding:1%; padding-top:3%'>";
+                html+=" <img class='card-img-top'  src ='https://img.youtube.com/vi/"+vid[i].id.videoId+"/default.jpg' value='"+vid[i].id.videoId+"' alt='Card image cap'>";
+                html += "<div class='card-body' > <p class='card-text'><b>"+ vid[i].snippet.title +"</b><br>"+vid[i].snippet.channelTitle+"<br>"+ (vid[i].snippet.publishedAt).slice(0,-14)+"</p></div></div> ";
+//$("#catalogo").append("<button data-dismiss='modal'  onclick='caricavideo("+JSON.stringify(data[i].videoID)+")'>"+"
+//<div  class='card border-info mb-3' style='border:1px;width: 11rem;height: 7rem; display: inline-block; '>
+//<img class='card-img-top' src ='https://img.youtube.com/vi/"+(JSON.stringify(data[i].videoID)).slice(1,-1)+"/default.jpg' value='"+ data[i].videoID +"' alt='Card image cap'>
+//<div class='card-body'  style=' overflow: hidden; text-overflow=ellipsis'> <p class='card-text' ><b>"+ data[i].title +"</b><br>"+data[i].category+"<br>"+data[i].artist+"</p></div></div>");
+            
+            } else{
+                html += "<div  class='card border-info mb-3' style='width: 16rem; border:none; display: inline-block; padding:1%; padding-top:3%''>";
+                html+=" <img class='card-img-top'  src ='https://img.youtube.com/vi/"+vid[i].id+"/default.jpg' value='"+vid[i].id+"' alt='Card image cap'>";
+                html += "<div class='card-body' style=' overflow: hidden;> <p class='card-text'><b>"+ vid[i].snippet.title +"</b><br>"+vid[i].snippet.channelTitle+"<br>"+ (vid[i].snippet.publishedAt).slice(0,-14)+"</p></div></div> ";
             }
+          
+           
+            
           }
           $(".tabcontent#"+category).html(html);
 
@@ -339,7 +348,7 @@ function  cutTitle(data){
                 caricavideo($(this).attr("value"));
           });
         }
-
+       
         var resSearch="";
         var resRand="";
         var Fvit="";
@@ -359,7 +368,7 @@ function  cutTitle(data){
             }
             //serve per inserire le immagini nel tab
             document.getElementById(category).style.display = "block";
-
+           
             var dim=recommender_size;
             var vid=[recommender_size];
             var info=true;
@@ -374,7 +383,7 @@ function  cutTitle(data){
                            complete: function(){
                               if(j<20)
                                 takeInfoById(j);
-                             if(j==20)
+                              if(j==20)
                                 stampa(vid,dim,category,info);
                            }
                         });
@@ -387,32 +396,30 @@ function  cutTitle(data){
               var j=0;
 
               takeInfoById(j);
-
+                   
               }
             if((category=="popLocAss")||(category=="popLocRel")||(category=="popGlobAss")||(category=="popGlobRel")){
               info=false
-              var prom=caricaPopularity(category,vid);
+        var prom=caricaPopularity(category,vid);
               prom.then(function(d){
-              dim=d;
+    dim=d;
                 var j=0;
                 takeInfoById(j);
-        });
+        });      
             }
-
+            
             if (category=="search") {
               //controllo se sto cercando per id, se vero lancio direttamente il video legato all' id
-              if(resSearch.items[0].id.videoId==$('#query').val()){
+              if(resSearch.items[0].id.videoId==$('#query').val()){ 
                   dim=0;
                   caricavideo(resSearch.items[0].id.videoId);
               }
               //visualizzo la lista dei video cercati
-              else{
+              else{     
                   dim=resSearch.items.length;
                   for (var i = 0; i < dim; i++) {
                       vid[i]=resSearch.items[i];
                   }
-                   stampa(vid,dim,category,info);
-
               }
             }
             if(category=="Fvitali"){
@@ -420,22 +427,20 @@ function  cutTitle(data){
               for (var i = 0; i <dim; i++) {
                 vid[i]=Fvit.recommended[i].videoID;
 
-              }
+              } 
               info =false;
               var j=0;
                   takeInfoById(j);
             }
 
-
+           
             if (category=="Random") {
               dim=20;
               for (var i = 0; i < 20; i++) {
                   vid[i]=resRand.items[i];
               }
-               stampa(vid,dim,category,info)
-
             }
-
+         
           if(category =="Related"){
               var request_related = gapi.client.request({
               'method': 'get',
@@ -453,10 +458,11 @@ function  cutTitle(data){
                   vid[i]=resRel.items[i];
                 }
                 stampa(vid,dim,category,info)
-
+  
               });
             }
-              if(category== "ArtistSimilarity"){
+
+	if(category== "ArtistSimilarity"){
                   var currVid;
                   var html="";
 
@@ -467,18 +473,8 @@ function  cutTitle(data){
                       complete: function(){
   var titolo;
                         titolo=cutTitle(currVid.snippet.title);
-                            /*  title=currVid.snippet.title;
-                              title=title.split("-");
-                              //console.log(title);
-                              if(title.length==1){
-                                title=title[0].split("|");
-                              }if(title.length>1){
-                                artist=title[0].trim();
-                                title[0]=title[0].trim();
-                                var titolo=title[1].split("(");
-                                console.log("titolo" + titolo[0]);
-                              }*/
-                              $.get("http://localhost:8000/Artist?title="+titolo[0].trim(), function(data, status){
+                           
+                              $.get("http://site1830.tw.cs.unibo.it/Artist?title="+titolo[1].trim(), function(data, status){
 
                                     var artist="";
                                     var album="";
@@ -490,14 +486,10 @@ function  cutTitle(data){
                                     if(data.results.bindings.length>0){
                                       for(var k=0; k<data.results.bindings.length; k++){
                                         artist=data.results.bindings[k].artName.value;
-                                        //var album=data.results.bindings[0].album;
-                                        //var date=data.results.bindings[0].date;
-
-
+                                     
                                         console.log("artist: "+artist);
-                                        $.get("http://localhost:8000/Song?artist="+artist, function(data, status){
-                                          //console.log("data:  "+data.results.bindings[0].albumName.value);
-                                          if(data.results.bindings.length>0){
+                                        $.get("http://site1830.tw.cs.unibo.it/Song?artist="+artist, function(data, status){
+                                         if(data.results.bindings.length>0){
                                             album=data.results.bindings[0].albumName.value;
                                             var date="";
                                             date=data.results.bindings[0].date;
@@ -564,31 +556,19 @@ function  cutTitle(data){
                     complete: function(){
                            var titolo;
                       titolo=cutTitle(currVid.snippet.title);
-                        /*  title=currVid.snippet.title;
-                          console.log(title);
-                          title=title.split("-");
-                          console.log(title.length);
-                          if(title.length==1){
-                            title=title[0].split("|");
-                          }
-                          if(title.length>1){
-                              title[0]=title[0].trim();
-                              var titolo=title[0].split("(");}
-                              console.log("title[1]: "+title[1]);
-*/
-                              $.get("http://localhost:8000/GenreSimilarity?title="+titolo[0].trim(), function(data, status){
+                          $.get("http://site1830.tw.cs.unibo.it/GenreSimilarity?title="+titolo[1].trim(), function(data, status){
                                   var genere="";
                                   if(data.results.bindings.length>0){
                                       genere=data.results.bindings[0].genereNome.value;
 
                                       console.log(genere);
 
-                                      $.get("http://localhost:8000/Artist?title="+titolo[0].trim(), function(data, status){
+                                      $.get("http://site1830.tw.cs.unibo.it/Artist?title="+titolo[1].trim(), function(data, status){
                                           if(data.results.bindings.length>0){
                                               for(var k=0; k<data.results.bindings.length; k++){
                                                   artist=data.results.bindings[k].artName.value;
                                                   console.log("artist:"+artist);
-                                                  $.get("http://localhost:8000/Genre?genere="+genere+"&artist"+artist, function(data, status){
+                                                  $.get("http://site1830.tw.cs.unibo.it/Genre?genere="+genere+"&artist"+artist, function(data, status){
 
                                                           if(data.results.bindings[0].genereNome){
                                                               for(var j=0;j<recommender_size;j++){
@@ -650,24 +630,13 @@ if (category=="BandSimilarity"){
                 complete: function(){
                      var titolo;
                   titolo=cutTitle(currVid.snippet.title);
-                  /*  title=currVid.snippet.title;
-                    title=title.split("-");
-                    //console.log(title);
-                    if(title.length==1){
-                      title=title[0].split("|");
-                    }if(title.length>1){
-                        artist=title[0].trim();
-                        title[0]=title[0].trim();
-                        var titolo=title[1].split("(");
-                        console.log("titolo" + titolo[0]);
-*/
-                        $.get("http://localhost:8000/BandSimilarity?title="+titolo[0].trim(), function(data, status){
+                   $.get("http://site1830.tw.cs.unibo.it/BandSimilarity?title="+titolo[1].trim(), function(data, status){
 
                             var band="";
                             if(data.results.bindings[0].bandName){
                                 band=data.results.bindings[0].bandName.value;
                                 console.log(data.results.bindings[0].bandName.value);
-                                $.get("http://localhost:8000/GenreMembri?band="+band, function(data, status){
+                                $.get("http://site1830.tw.cs.unibo.it/GenreMembri?band="+band, function(data, status){
                                     var membri="";
                                     console.log(data.results.bindings.length);
                                     //  if(data.results.bindings[0]){
@@ -676,7 +645,7 @@ if (category=="BandSimilarity"){
                                         membri=data.results.bindings[k].memberName.value;
                                         console.log(membri);
                                         console.log(band);
-                                        $.get("http://localhost:8000/Band?membriBand="+membri+"&band="+band, function(data, status){
+                                        $.get("http://site1830.tw.cs.unibo.it/Band?membriBand="+membri+"&band="+band, function(data, status){
                                             var songs="";
                                             var nomeBand="";
                                             console.log(data.results.bindings.length);
@@ -731,6 +700,10 @@ if (category=="BandSimilarity"){
                                   $(".tabcontent#"+category).html(html);
                                   html="";
                                   }
+
+
+          if((category!="popLocAss")&&(category!="popLocRel")&&(category!="popGlobAss")&&(category!="popGlobRel"))
+              stampa(vid,dim,category,info);
         }
         function makeid() {
             var text = "";
@@ -743,25 +716,23 @@ if (category=="BandSimilarity"){
           var params = new URLSearchParams(queryString.substring(1));
           var id=params.get("id");
           if(id!=null){
+            var stateObj = { id: id };
+            history.replaceState(stateObj , currentVideo, "?id="+id);
             newClock();
             currentVideo=id;
-          }else{
-            id=currentVideo;
+            current_reason="undentified";
+            caricaTab("Recent");
           }
-          var stateObj = { id: id };
-          history.replaceState(stateObj , currentVideo, "?id="+id);
-          current_reason="undentified";
-          caricaTab("Recent");
-
         }
+        
 
-
-
-
+        
+         
         // inserita search luci
 
-        $(document).ready(function(){
+        $(document).ready(function(){   
           initHistory();
+	console.log("ready");
           $(window).on('popstate', function() {
             var id = history.state.id;
             historyBack(id);
@@ -787,6 +758,7 @@ if (category=="BandSimilarity"){
            $("#random-button").click(function(e){
             e.preventDefault();
             var q = makeid();
+	    console.log("random");
             var request = gapi.client.youtube.search.list({
                   q:q,
                   part: 'snippet',
@@ -795,16 +767,16 @@ if (category=="BandSimilarity"){
                   maxResults: 50
             });
             request.execute(function(response){
-
+            
               var rnd=Math.floor(Math.random()*response.items.length);
               resRand=response;
               $('#random-button').click(caricaTab('Random'));
                console.log(response);
-               console.log(resRand);
+               //console.log(resRand);
             });
           });
 
-
+        
          $("#Fvitali-button").click(function(e){
             $.ajax({
 
@@ -816,8 +788,8 @@ if (category=="BandSimilarity"){
               error: function(data) {
                 alert("Caricamento impossibile");
               }
-            });
-          });
+            });    
+          });    
 
 
       });
