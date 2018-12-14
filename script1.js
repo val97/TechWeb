@@ -1,88 +1,17 @@
-		var tag = document.createElement('script');
+  var tag = document.createElement('script');
 
       tag.src = "https://www.youtube.com/iframe_api";
  
       var firstScriptTag = document.getElementsByTagName('script')[0];
       firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
 
-      var recommender_size=20;    //dimensione tabella degli ultimi video visitati
-      var currentVideo="8of3uhG1tCI";
-      var lastVideo=null; //video precedente a quello attualmente visto
-      var last_reason=null;
-      var current_reason=null;
-      //timer per controllare i secondi di video passati prima di salvarlo
-      var clock;
-      var timerOn=0;
-      var time;
+     
 
-
-      function savePopularity(){
-        $.get("http://site1830.tw.cs.unibo.it/popularity?to_id="+currentVideo+"&reason="+current_reason, function(data, status){
-
-        });
-        var vid_recent=[recommender_size];
-        var size=caricarecent(vid_recent);
-        var flag=false;
-        if(lastVideo!=currentVideo)
-          for(var i=0;i<size;i++){
-            if(lastVideo==vid_recent[i]){
-              $.get("http://site1830.tw.cs.unibo.it/popularity?from_id="+lastVideo+"&to_id="+currentVideo+"&reason="+current_reason, function(data, status){
-                    //alert("last video: " + lastVideo + "\this video: " + currentVideo);
-              });
-            }
-    }
-      }
-      function caricaPopularity(ask,out){
-        var prom=new Promise(function(resolve,reject){
-          $.get("http://site1830.tw.cs.unibo.it/popularity?from_id="+currentVideo+"&ask="+ask, function(data, status){
-              var v=JSON.parse(data);
-              for(var i = 0;i<v.length;i++)
-              out[i]=v[i].to_id;
-              resolve(v.length);
-          });
-        });
-        return prom;
-      }
-      function saveReason(category){
-	var out="undefined";
-        if((category=="popLocAss")||(category=="popLocRel")){
-          out="LocalPopularity";
-        }else if((category=="popGlobAss")||(category=="popGlobRel")){
-          out="GlobalPopularity";
-        }else out=category;	
- 	 last_reason=out;
-      }
-      function timedCount(){
-        time=time+1;
-        if(time==10){ //se il viddeo e' stato visto
-          salvarecent(currentVideo);
-        savePopularity();
-
-        }
-        if(time<10)
-          clock=setTimeout(timedCount, 1000);
-       }
-
-
-      function startClock(){
-        if(!timerOn){
-          timerOn=1;
-          timedCount();
-        }
-      }
-      function newClock(){
-        timerOn=0;
-        time=0;
-
-      }
-      function stopClock(){
-        clearTimeout(clock);
-        timerOn=0;
-
-      }
+      
+      
       //inizializzazione player
       var player;
-      var	onYouTubeIframeAPIReady =      function onYouTubeIframeAPIReady() {
+      var onYouTubeIframeAPIReady =      function onYouTubeIframeAPIReady() {
         player = new YT.Player('player', {
           height: '390',
           width: '640',
@@ -99,157 +28,8 @@
       function onPlayerReady(event) {
         event.target.playVideo();
       }
-	
-
-      function  cutTitle(data){
-      	var  title=data;
-
-        title=title.split("-");
-        //console.log(title);
-        if(title.length==1){
-
-          title=title[0].split("|");
-
-        }if(title.length>1){
-
-           title[0]=title[0].trim();
-           title[1]=title[1].split("(");
-           //if(title[1].length>=2)
-           	title[1]=title[1].shift();
-		title[1]=title[1].trim();
-           console.log(title);
-        }
-         // console.log("titolo"+titolo);
-         return(title);
-
-         //ritorno un'array dove il primo elemento è il nome dell'artista e il secondo è il titolo della canzone. 
-         //voi quando prendete l'oggetto ritornato all'interno della funzione vi dovete prendere oggetto[1].
-}
-
       //prende titolo e nome dell'artista
- /*        function getDbpediaInfo(){
-          var currVid;
-          var artist="";
-          var title="";
-
-           $.ajax({
-                           url: 'https://www.googleapis.com/youtube/v3/videos?key=' + 'AIzaSyCmxhjyAdTBxuEOG_etapCgLYwIBpSmdbQ' + '&id=' + currentVideo + '&part=snippet',
-                           success: function(data){ currVid=data.items[0];},
-
-                           complete: function(){
-
- 				var titolo;
-				titolo=cutTitle(currVid.snippet.title);
-/                                console.log(titolo);
-                              	$.get("http://eva.cs.unibo.it:8000/abstract?artist="+titolo[0]+"&title="+titolo[1].trim(), function(data, status){
-				console.log("ho chiesto l'abstract");
-                                   var wiki="";
-				  console.log("wiki");
-				console.log(wiki.value);
-                                   wiki=data.results.bindings[0].Sabstract;
-                                   var artist=data.results.bindings[0].abstract;
-                                    if(data.results.bindings[0].Sabstract>0){
-                                      $('#wiki_container').html(wiki.value);
-                                      $('#artist_container').html(artist.value);
-                                    }
-                                    else{
-                                      $('#wiki_container').html("no abs founded\n");
-                                      $('#artist_container').html("no abs founded\n");
-                                    }
-                                    
-                                });
-                                $.get("http://eva.cs.unibo.it:8000/info?artist="+titolo[0]+"&title="+titolo[1].trim(), function(data, status){
-                                  console.log("risposta: ");
-                          	  console.log(data.results.bindings[0]);
-			            if(data.results.bindings[0]){
-                                    var info=data.results.bindings[0];
-                                     if(info.album.value)
-                                        $('#info_container').append("album: <a href=" +info.album.value+"</a>"+info.album.value+" <br>");
-                                     if(info.artName.value)
-                                        $('#info_container').append("artista" +info.artName.value+"<br>");
-                                     if(info.relDate.value)
-                                        $('#info_container').append("relDate: " +info.relDate.value+"<br>");
-                                    if(info.genre.value)
-                                        $('#info_container').append("genre:" +info.genre.value+"<br>"); 
-				    if(info.wik.value)
-                                        $('#info_container').append("wiki" +info.wik.value+"<br>");
-                                }
-	
-                                });
-
-                              }
-           });
-         }
-
-   */
-
-function getDbpediaInfo(){
-          var currVid;
-          var artist="";
-          var title="";
-
-           $.ajax({
-                           url: 'https://www.googleapis.com/youtube/v3/videos?key=' + 'AIzaSyCmxhjyAdTBxuEOG_etapCgLYwIBpSmdbQ' + '&id=' + currentVideo + '&part=snippet',
-                           success: function(data){ currVid=data.items[0];},
-
-                           complete: function(){
-
-                            
-/*                              title=currVid.snippet.title;
-                            
-                              title=title.split("-");
-                              //console.log(title);
-                              if(title.length==1){
-                               
-                                title=title[0].split("|");
-
-                              }if(title.length>1){
-                              
-                                artist=title[0].trim();
-                                title[0]=title[0].trim();*/
-                                var titolo=cutTitle(currVid.snippet.title);
-                               // console.log("titolo"+titolo);
-                                $.get("http://site1830.tw.cs.unibo.it/abstract?artist="+titolo[0]+"&title="+titolo[1].trim(), function(data, status){
-
-                                 if(data.results.bindings[0]){
-                                    var wiki=data.results.bindings[0].Sabstract;
-                                    var artist=data.results.bindings[0].abstract;
-                                    if(data.results.bindings[0].Sabstract){
-                                      $('#wiki_container').html(wiki.value);
-                                      $('#artist_container').html(artist.value);
-                                    }
-                                  }
-                                    else{
-                                      $('#wiki_container').html("no abs founded\n");
-                                      $('#artist_container').html("no abs founded\n");
-                                    }
-                                    
-                                });
-                                $.get("http://site1830.tw.cs.unibo.it/info?artist="+titolo[0]+"&title="+titolo[1].trim(), function(data, status){
-                                  console.log("risposta: ");
-                                   
-                                   if(data.results.bindings[0]){
-                                    var info=data.results.bindings[0];
-                                   console.log(info);
-				    if(info.album.value)
-                                        $('#info_container').append("<a href= "+info.album.value+">album:" +info.album.value+"</a><br>");
-                                     if(info.artName.value) 
-                                        $('#info_container').append("artista" +info.artName.value+"<br>");
-                                    if(info.relDate.value)
-                                        $('#info_container').append("relDate" +info.relDate.value+"<br>");
-                                   if(info.genre.value)
-					$('#info_container').append( "<a href="+info.genre.value+"genre "+info.genre.value+"</a><br>");  
-				    if(info.wik.value)
-                                        $('#info_container').append("wiki" +info.wik.value+"<br>");
-                                }else
-				  $('info_container').append("no info founded");
-                                });
-
-                               }
-           });
-         }  
-      var done = false;
-      function onPlayerStateChange(event) {
+ function onPlayerStateChange(event) {
        if(event.data == YT.PlayerState.PLAYING){
           startClock();
           getDbpediaInfo();
@@ -265,26 +45,32 @@ function getDbpediaInfo(){
           request.execute(function(response){
             var i;
             var html="";  
-              for(i=0; i<response.items.length && i<20   ; i++){
-                  html+="<img width='28' heigth='28' src="+JSON.stringify(response.items[i].snippet.topLevelComment.snippet.authorProfileImageUrl)+"> <b> "+ JSON.stringify(response.items[i].snippet.topLevelComment.snippet.authorDisplayName).slice(1,-1) +" </b> <br> "+ JSON.stringify(response.items[i].snippet.topLevelComment.snippet.textOriginal)+"<hr>";
-                  $('#comment_container').html(html);
-              }
+        for(i=0; i<response.items.length && i<20   ; i++){
+      html+=" <div class='media border p-3 '>";
+      html +=  "<img src="+JSON.stringify(response.items[i].snippet.topLevelComment.snippet.authorProfileImageUrl)+" alt="+JSON.stringify(response.items[i].snippet.topLevelComment.snippet.authorProfileImageUrl)+" class='mr-3 mt-3 rounded-circle' style='width:65px;height:65px'>";
+      html+=  "<div class='media-body'>";
+      html +="<h5>"+ JSON.stringify(response.items[i].snippet.topLevelComment.snippet.authorDisplayName).slice(1,-1)+"<small><i>   Posted on  "+JSON.stringify(response.items[i].snippet.topLevelComment.snippet.publishedAt).slice(1,-15)+"</i></small></h5>";
+      html+="<p>"+ JSON.stringify(response.items[i].snippet.topLevelComment.snippet.textOriginal).slice(1,-1)+"</p></div></div>";
+
+      //<small><i>Posted on February 19, 2016</i></small>
+      //  html+="<img width='28' heigth='28' src="+JSON.stringify(response.items[i].snippet.topLevelComment.snippet.authorProfileImageUrl)+"> <b> "+ JSON.stringify(response.items[i].snippet.topLevelComment.snippet.authorDisplayName).slice(1,-1) +" </b> <br> "+ JSON.stringify(response.items[i].snippet.topLevelComment.snippet.textOriginal)+"<hr>";
+      $('#comment_container').html(html +"<br>");
+        }
           });
-      
-        //DESCRIZIONE E TITOLO
-          var request1 = gapi.client.youtube.videos.list({
-            'method': 'get',
-            'path': '/youtube/v3/videos',
-              'id': q,
-              'part': 'snippet'
-          });
+     //DESCRIZIONE E TITOLO
+     var request1 = gapi.client.youtube.videos.list({
+         'method': 'get',
+         'path': '/youtube/v3/videos',
+         'id': q,
+         'part': 'snippet'  });
           request1.execute(function(response){
             var title="";
             var desc="";
-            title +="<b><h2>"+JSON.stringify(response.items[0].snippet.title)+"</h2></b>";
+            title +="<b><h2>"+response.items[0].snippet.title+"</h2></b>";
             desc += "<p>"+JSON.stringify(response.items[0].snippet.description)+"</p>";
             desc.replace("\n","<br>");
-            $('#description_container').html(desc);
+           // title.replace('" ', " ");
+            $('#description_container').html(desc +"<br>");
             $('#title_container').html(title);
           });
         
@@ -299,69 +85,33 @@ function getDbpediaInfo(){
       //viene riempita la lista delle canzoni iniziali
       function loadCatalog(data){
           for (var i = 0; i < data.length; i++) {
-             main += "<div  class='card border-info mb-3' style='width: 16rem;height: 20rem; display: inline-block;'>";
-            main +=" <img class='card-img-top'  src ='https://img.youtube.com/vi/"+(JSON.stringify(data[i].videoID)).slice(1,-1)+"/default.jpg' value='"+data[i].videoID+"' alt='Card image cap'>";
+                
+                $("#catalogo").append("<button data-dismiss='modal'  onclick='caricavideo("+JSON.stringify(data[i].videoID)+")'>"+"<div  class='card border-info mb-3' style='border:1px;width: 11rem;height: 7rem; display: inline-block; '><img class='card-img-top' src ='https://img.youtube.com/vi/"+(JSON.stringify(data[i].videoID)).slice(1,-1)+"/default.jpg' value='"+ data[i].videoID +"' alt='Card image cap'><div class='card-body'  style=' overflow: hidden; text-overflow=ellipsis'> <p class='card-text' ><b>"+ data[i].title +"</b><br>"+data[i].category+"<br>"+data[i].artist+"</p></div></div>");
+            /* main += "<div  class='card border-info mb-3' style='width: 16rem;height: 20rem; display: inline-block;'>";
+            main +=" <img class='card-img-top'  src ='https://img.youtube.com/vi/"+(JSON.stringify(data[i].videoID)).slice(1,-1)+"/default.jpg' value='"+JSON.stringify(data[i].videoID)+"' alt='Card image cap'>";
              main += "<div class='card-body'> <p class='card-text'><b>"+ data[i].title +"</b><br>"+data[i].category+"<br>"+ data[i].artist+"</p></div></div> ";
-          }
-          $(".container-fluid").html(main);
-	  $('img').click(function(){
-                console.log($(this).attr("value"));
-                caricavideo($(this).attr("value"));
-          });
-        }
+         */ }
+
+         // $(".container-fluid").html(main);
+}
 
         function caricavideo(data){
             newClock();
-      lastVideo=currentVideo;
+            lastVideo=currentVideo;
             currentVideo=data;
+            document.getElementById("lista").click();
             player.loadVideoById(data, 0, "large");  //"0" secondi di inizio del video
             current_reason=last_reason;
              $('#wiki_container').html(" ");
             $('#artist_container').html(" ");
-		$('#info_container').html(" ");
+           $('#info_container').html(" ");
             var stateObj = {id:data};
             history.pushState(stateObj , data, "?id="+data);
             caricaTab("Recent");
 
            
         }
-  function historyBack(id){
-            newClock();
-      lastVideo=null;
-            currentVideo=id;
-            player.loadVideoById(id, 0, "large");  //"0" secondi di inizio del video
-        }
-
-        function salvarecent(ID){
-          var vid=[recommender_size];
-          var dim=caricarecent(vid);
-          var exist=false;
-          for (var i = 0; i <dim; i++) {
-           if(ID==vid[i])
-              exist=true;
-          }
-
-          if(!exist){
-                var key=localStorage.getItem("counter");  //counter=valore della prossima chiave libera 
-                if (!key)    //se non esiste già
-                  key=0;  
-                localStorage.setItem(key, ID);
-                key++;
-                key=key%recommender_size;
-                localStorage.setItem("counter", key);
-          }
-        }
-        function caricarecent(out){
-          var i;
-          for(i=0;i<recommender_size;i++){
-          key=(localStorage.getItem("counter")-i-1+recommender_size)%recommender_size;
-          var video=localStorage.getItem(key);
-          if (video==null)
-            return i;   //dimensione di out
-          out[i]= video;     //returna null se l'eselmento non esiste
-          }
-          return recommender_size;
-        }
+  
 
         //aggiunge la lista di canzoni iniziale
         function riempi(){
@@ -379,22 +129,22 @@ function getDbpediaInfo(){
           });       
         }
         //riempie i recommender
-       function stampa(vid, dim,category,info){
+       function stampa(v, dim,category,info){
+         var vid=v;
          var html="";
+  console.log(vid);
           for (var i = 0; i < dim; i++) {
-            if(info){
-                html += "<div  class='card border-info mb-3' style='width: 16rem;display: inline-block;'>";
+        if(vid[i]!= "undefined"){
+        if(info){
+                html += "<div  class='card border-info mb-3' style='width: 16rem; border:none; display: inline-block; padding:1%; padding-top:3%'>";
                 html+=" <img class='card-img-top'  src ='https://img.youtube.com/vi/"+vid[i].id.videoId+"/default.jpg' value='"+vid[i].id.videoId+"' alt='Card image cap'>";
-                html += "<div class='card-body'> <p class='card-text'><b>"+ vid[i].snippet.title +"</b><br>"+vid[i].snippet.channelTitle+"<br>"+ (vid[i].snippet.publishedAt).slice(0,-14)+"</p></div></div> ";
-
-            } else{
-                html += "<div  class='card border-info mb-3' style='width: 16rem; display: inline-block;'>";
+                html += "<div class='card-body'style=' overflow: hidden' > <p class='card-text'><b>"+ vid[i].snippet.title +"</b><br>"+vid[i].snippet.channelTitle+"<br>"+ (vid[i].snippet.publishedAt).slice(0,-14)+"</p></div></div> ";
+      } else{
+                html += "<div  class='card border-info mb-3' style='width: 16rem; border:none; display: inline-block; padding:1%; padding-top:3%''>";
                 html+=" <img class='card-img-top'  src ='https://img.youtube.com/vi/"+vid[i].id+"/default.jpg' value='"+vid[i].id+"' alt='Card image cap'>";
-                html += "<div class='card-body'> <p class='card-text'><b>"+ vid[i].snippet.title +"</b><br>"+vid[i].snippet.channelTitle+"<br>"+ (vid[i].snippet.publishedAt).slice(0,-14)+"</p></div></div> ";
+		html += "<div class='card-body' style=' overflow: hidden';> <p class='card-text'><b>"+ vid[i].snippet.title +"</b><br>" +vid[i].snippet.channelTitle+"<br>"+ (vid[i].snippet.publishedAt).slice(0,-14)+"</p></div></div> ";
+              }
             }
-          
-           
-            
           }
           $(".tabcontent#"+category).html(html);
 
@@ -402,15 +152,25 @@ function getDbpediaInfo(){
                 caricavideo($(this).attr("value"));
           });
         }
-       
-        var resSearch="";
-        var resRand="";
-        var Fvit="";
-        var resRel="";
+       function takeInfoById(vid,dim,category,info,j){
+              $.ajax({
+                           url: 'https://www.googleapis.com/youtube/v3/videos?key=' + 'AIzaSyCmxhjyAdTBxuEOG_etapCgLYwIBpSmdbQ' + '&id=' + vid[j] + '&part=snippet',
+                           success: function(data){
+                              vid[j]=data.items[0];
+                              j++;
+                           } ,
+                           complete: function(){
+                              if((j<20)&&(j<dim))
+                                takeInfoById(vid,dim,category,info,j);
+                              else    //if(j==20)
+                                stampa(vid,dim,category,info);
+                           }
+                        });
+              }
+        
 
         function caricaTab(category) {
             saveReason(category);
-
             var i, tabcontent, tablinks;
             tabcontent = document.getElementsByClassName("tabcontent");
             for (i = 0; i < tabcontent.length; i++) {
@@ -424,42 +184,26 @@ function getDbpediaInfo(){
             document.getElementById(category).style.display = "block";
            
             var dim=recommender_size;
-            var vid=[recommender_size];
+            vid=[];
             var info=true;
 
-            function takeInfoById(j){
-              $.ajax({
-                           url: 'https://www.googleapis.com/youtube/v3/videos?key=' + 'AIzaSyCmxhjyAdTBxuEOG_etapCgLYwIBpSmdbQ' + '&id=' + vid[j] + '&part=snippet',
-                           success: function(data){
-                              vid[j]=data.items[0];
-                              j++;
-                           } ,
-                           complete: function(){
-                              if(j<20)
-                                takeInfoById(j);
-                              if(j==20)
-                                stampa(vid,dim,category,info);
-                           }
-                        });
-            }
-
-
+         
             if(category=="Recent"){
-              info=false
+              info=false;
+              //dove è caricarecent???????? in popscript!
               dim=caricarecent(vid);
               var j=0;
-
-              takeInfoById(j);
+              takeInfoById(vid,dim,category,info,j);
                    
               }
             if((category=="popLocAss")||(category=="popLocRel")||(category=="popGlobAss")||(category=="popGlobRel")){
               info=false
         var prom=caricaPopularity(category,vid);
               prom.then(function(d){
-    dim=d;
+        dim=d;
                 var j=0;
-                takeInfoById(j);
-        });      
+                takeInfoById(vid,dim,category,info,j);
+              });      
             }
             
             if (category=="search") {
@@ -472,340 +216,66 @@ function getDbpediaInfo(){
               else{     
                   dim=resSearch.items.length;
                   for (var i = 0; i < dim; i++) {
-                      vid[i]=resSearch.items[i];
+                      vid.push(resSearch.items[i]);
                   }
+                  stampa(vid,dim,category,info);
               }
             }
+            //ho tolto -fvitali dal document ready e l'ho messo tutto su
             if(category=="Fvitali"){
-              dim=Fvit.recommended.length;
-              for (var i = 0; i <dim; i++) {
-                vid[i]=Fvit.recommended[i].videoID;
-
-              } 
-              info =false;
-              var j=0;
-                  takeInfoById(j);
-            }
+              getFvitali(vid,dim,info,category);
+               
+          }
+              
 
            
             if (category=="Random") {
-              dim=20;
-              for (var i = 0; i < 20; i++) {
-                  vid[i]=resRand.items[i];
-              }
+                 getRandom(vid,dim,info,category);
             }
          
           if(category =="Related"){
-              var request_related = gapi.client.request({
-              'method': 'get',
-              'path': '/youtube/v3/search',
-              'params':{
-                'part': 'snippet',
-                'relatedToVideoId': currentVideo,
-                'type': 'video',
-                'maxResults':recommender_size
-              }
-              });
-              request_related.execute(function(response){
-                resRel=response;
-                for(i=0;i<recommender_size;i++){
-                  vid[i]=resRel.items[i];
-                }
-                stampa(vid,dim,category,info)
-  
-              });
+            getRelated(vid,dim,info,category);
+              
             }
 
-	if(category== "ArtistSimilarity"){
-                  var currVid;
-                  var html="";
-
-                  $.ajax({
-                      url: 'https://www.googleapis.com/youtube/v3/videos?key=' + 'AIzaSyCmxhjyAdTBxuEOG_etapCgLYwIBpSmdbQ' + '&id=' + currentVideo + '&part=snippet',
-                      success: function(data){ currVid=data.items[0];},
-
-                      complete: function(){
-  var titolo;
-                        titolo=cutTitle(currVid.snippet.title);
-                            /*  title=currVid.snippet.title;
-                              title=title.split("-");
-                              //console.log(title);
-                              if(title.length==1){
-                                title=title[0].split("|");
-                              }if(title.length>1){
-                                artist=title[0].trim();
-                                title[0]=title[0].trim();
-                                var titolo=title[1].split("(");
-                                console.log("titolo" + titolo[0]);
-                              }*/
-                              $.get("http://site1830.tw.cs.unibo.it/Artist?title="+titolo[1].trim(), function(data, status){
-
-                                    var artist="";
-                                    var album="";
-
-                                    console.log(data);
-
-                                    console.log("status: "+status);
-
-                                    if(data.results.bindings.length>0){
-                                      for(var k=0; k<data.results.bindings.length; k++){
-                                        artist=data.results.bindings[k].artName.value;
-                                        //var album=data.results.bindings[0].album;
-                                        //var date=data.results.bindings[0].date;
-
-
-                                        console.log("artist: "+artist);
-                                        $.get("http://site1830.tw.cs.unibo.it/Song?artist="+artist, function(data, status){
-                                          //console.log("data:  "+data.results.bindings[0].albumName.value);
-                                          if(data.results.bindings.length>0){
-                                            album=data.results.bindings[0].albumName.value;
-                                            var date="";
-                                            date=data.results.bindings[0].date;
-                                            if(data.results.bindings[0].songName){
-
-                                              for(var j=0;j<recommender_size;j++){
-                                                var songs="";
-                                                songs=data.results.bindings[j].songName.value;
-                                                console.log("songs: ");
-                                                console.log(songs);
-                                                $.ajax({
-                                                  cache: false,
-                                                  data: {
-                                                    key:'AIzaSyCmxhjyAdTBxuEOG_etapCgLYwIBpSmdbQ',
-                                                    q:songs,
-                                                    part:'id,snippet',
-                                                    maxResults:1},
-                                                    dataType:'json',
-                                                    type:'GET',
-                                                    url:'https://www.googleapis.com/youtube/v3/search'
-                                                  })
-
-                                                  .done(function(data) {
-                                                    console.log(data.items[0]);
-
-                                                    html += "<div  class='card border-info mb-3' style='width: 16rem;display: inline-block;'>";
-                                                    html+=" <img class='card-img-top'  src ='https://img.youtube.com/vi/"+data.items[0].id.videoId+"/default.jpg' value='"+data.items[0].id.videoId+"' alt='Card image cap'>";
-                                                    html += "<div class='card-body'> <p class='card-text'><b>"+ data.items[0].snippet.title +"</b><br>"+data.items[0].snippet.channelTitle+"<br>"+ (data.items[0].snippet.publishedAt).slice(0,-14)+"</br><br>"+artist+"</br><br>"+album+"</br></p></div></div> ";
-
-                                                    //console.log(html);
-                                                    $(".tabcontent#"+category).html(html);
-                                                    $('img').click(function(){
-                                                          caricavideo($(this).attr("value"));
-                                                    });
-                                                  });
-                                                }
-                                              }
-                                            }
-                                              else {
-
-                                        $('#ArtistSimilarity').html('<h1>Sorry</h1><br><h3>Not found!</h3>');
-
-                                      }
-                                          });
-                                        }
-                                      }
-                                    });
-                                  }
-                                });
-                                 $(".tabcontent#"+category).html(html);
-          html="";
-                              }
-
+  if(category== "ArtistSimilarity"){
+    getArtistSimilarity(category);
+      }
 
    if(category== "GenreSimilarity"){
-
-      var currVid;
-      var html="";
-      var artist="";
-      $.ajax({
-        url: 'https://www.googleapis.com/youtube/v3/videos?key=' + 'AIzaSyCmxhjyAdTBxuEOG_etapCgLYwIBpSmdbQ' + '&id=' + currentVideo + '&part=snippet',
-                    success: function(data){ currVid=data.items[0];},
-
-                    complete: function(){
-                           var titolo;
-                      titolo=cutTitle(currVid.snippet.title);
-                        /*  title=currVid.snippet.title;
-                          console.log(title);
-                          title=title.split("-");
-                          console.log(title.length);
-                          if(title.length==1){
-                            title=title[0].split("|");
-                          }
-                          if(title.length>1){
-                              title[0]=title[0].trim();
-                              var titolo=title[0].split("(");}
-                              console.log("title[1]: "+title[1]);
-*/
-                              $.get("http://site1830.tw.cs.unibo.it/GenreSimilarity?title="+titolo[1].trim(), function(data, status){
-                                  var genere="";
-                                  if(data.results.bindings.length>0){
-                                      genere=data.results.bindings[0].genereNome.value;
-
-                                      console.log(genere);
-
-                                      $.get("http://site1830.tw.cs.unibo.it/Artist?title="+titolo[1].trim(), function(data, status){
-                                          if(data.results.bindings.length>0){
-                                              for(var k=0; k<data.results.bindings.length; k++){
-                                                  artist=data.results.bindings[k].artName.value;
-                                                  console.log("artist:"+artist);
-                                                  $.get("http://site1830.tw.cs.unibo.it/Genre?genere="+genere+"&artist"+artist, function(data, status){
-
-                                                          if(data.results.bindings[0].genereNome){
-                                                              for(var j=0;j<recommender_size;j++){
-                                                                  var songs="";
-                                                                  var gen="";
-                                                                  gen=data.results.bindings[0].genereNome.value;
-                                                                  songs=data.results.bindings[j].songName.value;
-                                                                  console.log("songs: ");
-                                                                  console.log(songs);
-                                                                  $.ajax({
-                                                                      cache: false,
-                                                                      data: {
-                                                                        key:'AIzaSyCmxhjyAdTBxuEOG_etapCgLYwIBpSmdbQ',
-                                                                        q:songs,
-                                                                        part:'id,snippet',
-                                                                        maxResults:1},
-                                                                        dataType:'json',
-                                                                        type:'GET',
-                                                                        url:'https://www.googleapis.com/youtube/v3/search'
-                                                                      })
-
-                                                                      .done(function(data) {
-                                                                          console.log(data.items[0]);
-
-                                                                          html += "<div  class='card border-info mb-3' style='width: 16rem;display: inline-block;'>";
-                                                                          html+=" <img class='card-img-top'  src ='https://img.youtube.com/vi/"+data.items[0].id.videoId+"/default.jpg' value='"+data.items[0].id.videoId+"' alt='Card image cap'>";
-                                                                          html += "<div class='card-body'> <p class='card-text'><b>"+ data.items[0].snippet.title +"</b><br>"+data.items[0].snippet.channelTitle+"<br>"+ (data.items[0].snippet.publishedAt).slice(0,-14)+"</br><br>"+gen+"</br></p></div></div> ";
-
-                                                                          //console.log(html);
-                                                                          $(".tabcontent#"+category).html(html);
-                                                                          $('img').click(function(){
-                                                                                caricavideo($(this).attr("value"));
-                                                                          });
-                                                                        });
-                                                                      }
-                                                                    }
-                                                                  });
-                                                                }
-                                                              }
-                                                            });
-                                                          }
-                                    else {
-
-                                        $('#GenreSimilarity').html('<h1>Sorry</h1><br><h3>Not found!</h3>');
-
-                                      }
-                              });
-                          }
-                  });
-                                     $(".tabcontent#"+category).html(html);
-                                      html="";
-      }
+      getGenreSimilarity(category);
+     
+   }
+                
+              
+                                                       
+                        
 if (category=="BandSimilarity"){
-    var html="";
-    $.ajax({
-        url: 'https://www.googleapis.com/youtube/v3/videos?key=' + 'AIzaSyCmxhjyAdTBxuEOG_etapCgLYwIBpSmdbQ' + '&id=' + currentVideo + '&part=snippet',
-                success: function(data){ currVid=data.items[0];},
-
-                complete: function(){
-                     var titolo;
-                  titolo=cutTitle(currVid.snippet.title);
-                  /*  title=currVid.snippet.title;
-                    title=title.split("-");
-                    //console.log(title);
-                    if(title.length==1){
-                      title=title[0].split("|");
-                    }if(title.length>1){
-                        artist=title[0].trim();
-                        title[0]=title[0].trim();
-                        var titolo=title[1].split("(");
-                        console.log("titolo" + titolo[0]);
-*/
-                        $.get("http://site1830.tw.cs.unibo.it/BandSimilarity?title="+titolo[1].trim(), function(data, status){
-
-                            var band="";
-                            if(data.results.bindings[0].bandName){
-                                band=data.results.bindings[0].bandName.value;
-                                console.log(data.results.bindings[0].bandName.value);
-                                $.get("http://site1830.tw.cs.unibo.it/GenreMembri?band="+band, function(data, status){
-                                    var membri="";
-                                    console.log(data.results.bindings.length);
-                                    //  if(data.results.bindings[0]){
-                                    var k=0;
-                                    for(k=0 ; k<data.results.bindings.length ; k++){
-                                        membri=data.results.bindings[k].memberName.value;
-                                        console.log(membri);
-                                        console.log(band);
-                                        $.get("http://site1830.tw.cs.unibo.it/Band?membriBand="+membri+"&band="+band, function(data, status){
-                                            var songs="";
-                                            var nomeBand="";
-                                            console.log(data.results.bindings.length);
-
-                                            if(data.results.bindings.length>0){
-                                                for(var j=0;j<data.results.bindings.length;j++){
-
-                                                    songs=data.results.bindings[j].songName.value;
-                                                    nomeBand=data.results.bindings[j].bandName.value;
-                                                    //console.log("songs: ");
-                                                    console.log(songs);
-                                                    $.ajax({
-                                                        cache: false,
-                                                        data: {
-                                                          key:'AIzaSyCmxhjyAdTBxuEOG_etapCgLYwIBpSmdbQ',
-                                                          q:songs,
-                                                          part:'id,snippet',
-                                                          maxResults:1},
-                                                          dataType:'json',
-                                                          type:'GET',
-                                                          url:'https://www.googleapis.com/youtube/v3/search'
-                                                        })
-
-                                                        .done(function(data) {
-                                                          console.log(data.items[0]);
-
-                                                          html += "<div  class='card border-info mb-3' style='width: 16rem;display: inline-block;'>";
-                                                          html+=" <img class='card-img-top'  src ='https://img.youtube.com/vi/"+data.items[0].id.videoId+"/default.jpg' value='"+data.items[0].id.videoId+"' alt='Card image cap'>";
-                                                          html += "<div class='card-body'> <p class='card-text'><b>"+ data.items[0].snippet.title +"</b><br>"+data.items[0].snippet.channelTitle+"<br>"+ (data.items[0].snippet.publishedAt).slice(0,-14)+"</br><br>"+membri+"</br><br>"+nomeBand+"</p></div></div> ";
-
-                                                          //console.log(html);
-                                                          $(".tabcontent#"+category).html(html);
-                                                          $('img').click(function(){
-                                                                caricavideo($(this).attr("value"));
-                                                          });
-                                                        });
-                                                      }
-                                                    }
-                                                  });
-                                                }
-                                              });
-                                            }
-                              else {
-
-                                        $('#BandSimilarity').html('<h1>Sorry</h1><br><h3>Not found!</h3>');
-
-                                      }
-                                          });
-                                        }
-
-                                    });
-                                  $(".tabcontent#"+category).html(html);
-                                  html="";
+  getBandSimilarity(category);
+  
                                   }
 
 
-          if((category!="popLocAss")&&(category!="popLocRel")&&(category!="popGlobAss")&&(category!="popGlobRel"))
-              stampa(vid,dim,category,info);
+          
+/*            if((category!="popLocAss")&&(category!="popLocRel")&&(category!="Random")&&(category!="popGlobAss")&&(category!="popGlobRel")&&(category!="ArtistSimilarity") &&(category!="GenreSimilarity") &&(category!="BandSimilarity"))
+    stampa(vid,dim,category,info);*/
         }
-        function makeid() {
-            var text = "";
-            var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-            text = possible.charAt(Math.floor(Math.random() * possible.length));
-            return text;
+function getQueryVariable(variable) {
+    var query = window.location.search.substring(1);
+    var vars = query.split('&');
+    for (var i = 0; i < vars.length; i++) {
+        var pair = vars[i].split('=');
+        if (decodeURIComponent(pair[0]) == variable) {
+            return decodeURIComponent(pair[1]);
         }
+    }
+    console.log('Query variable %s not found', variable);
+}
         function initHistory() {
-          var queryString = window.location.search;//getUrlVars()["id"];
+          /*var queryString = window.location.search;//getUrlVars()["id"];
           var params = new URLSearchParams(queryString.substring(1));
-          var id=params.get("id");
+          var id=params.get("id");*/
+          var id=getQueryVariable("id");
           if(id!=null){
             var stateObj = { id: id };
             history.replaceState(stateObj , currentVideo, "?id="+id);
@@ -816,14 +286,9 @@ if (category=="BandSimilarity"){
           }
         }
         
-
-        
-         
-        // inserita search luci
-
-        $(document).ready(function(){   
+        $(document).ready(function(){
           initHistory();
-	console.log("ready");
+  console.log("ready");
           $(window).on('popstate', function() {
             var id = history.state.id;
             historyBack(id);
@@ -846,45 +311,9 @@ if (category=="BandSimilarity"){
             }
           });
 
-           $("#random-button").click(function(e){
-            e.preventDefault();
-            var q = makeid();
-	    console.log("random");
-            var request = gapi.client.youtube.search.list({
-                  q:q,
-                  part: 'snippet',
-                  type: 'video',                //servono per far cercare soltanto video musicali
-                  videoCategoryId: '10',
-                  maxResults: 50
-            });
-            request.execute(function(response){
-            
-              var rnd=Math.floor(Math.random()*response.items.length);
-              resRand=response;
-              $('#random-button').click(caricaTab('Random'));
-               console.log(response);
-               //console.log(resRand);
-            });
-          });
-
-        
-         $("#Fvitali-button").click(function(e){
-            $.ajax({
-
-              url: "http://site1825.tw.cs.unibo.it/TW/globpop?"+"?id="+currentVideo,
-              success: function(data) {
-                Fvit=data;
-                $('#Fvitali-button').click(caricaTab('Fvitali'));
-              },
-              error: function(data) {
-                alert("Caricamento impossibile");
-              }
-            });    
-          });    
-
-
+         
       });
       function init(){
           gapi.client.setApiKey("AIzaSyCmxhjyAdTBxuEOG_etapCgLYwIBpSmdbQ");
           gapi.client.load("youtube","v3",function(){ });
-}
+      }
